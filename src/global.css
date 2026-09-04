@@ -12,50 +12,59 @@
   --font-serif: Georgia, 'Times New Roman', serif;
 }
 
-/* React Native Reusables design tokens (shadcn-style HSL CSS variables).
-   Placeholder neutral palette - Task 9 replaces these values with the
-   spec's dark-monochrome tokens (§10.2); this task only wires the plumbing. */
+/* Pantry List design tokens (spec §10.2), converted from hex to HSL for
+   Tailwind's hsl(var(--x)) pattern. Dark-only for MVP (decided in Task 9) -
+   there is no light `:root` variant; these values apply unconditionally. */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 63%;
-    --radius: 0.625rem;
-  }
-
-  .dark:root {
+    /* Background #0A0A0A */
     --background: 0 0% 3.9%;
+    /* Primary text #FAFAFA */
     --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
+
+    /* Surface #111111 - used for cards and popovers */
+    --card: 0 0% 6.7%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 0 0% 6.7%;
     --popover-foreground: 0 0% 98%;
+
+    /* Monochrome inversion for filled primary buttons: light bg, dark text */
     --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --primary-foreground: 0 0% 3.9%;
+
+    /* Surface muted #202020 - used for secondary/muted/accent surfaces alike;
+       spec's palette doesn't distinguish these three shadcn roles further */
+    --secondary: 0 0% 12.5%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --muted: 0 0% 12.5%;
+    --accent: 0 0% 12.5%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 70.9% 59.4%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 300 0% 45%;
+
+    /* Secondary text #A1A1AA */
+    --muted-foreground: 240 5% 64.9%;
+
+    /* Destructive #EF4444 */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border #27272A */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    /* Border strong #3F3F46, reused as the focus ring color */
+    --ring: 240 5.3% 26.1%;
+
+    /* 14px base radius: lg=14px (cards/sheets, spec's 12-16pt range),
+       md=12px, sm=10px (inputs/buttons, spec's 8-12pt range) */
+    --radius: 0.875rem;
+
+    /* Extra tokens beyond shadcn's default vocabulary, for spec's tiers that
+       have no built-in slot - see tailwind.config.js for the `elevated`,
+       `strong`, and `dim` color utilities built from these. */
+    /* Surface elevated #181818 */
+    --surface-elevated: 0 0% 9.4%;
+    /* Border strong #3F3F46 */
+    --border-strong: 240 5.3% 26.1%;
+    /* Muted text #71717A - dimmer than --muted-foreground (spec's "secondary text") */
+    --dim-foreground: 240 3.8% 46.1%;
   }
 }

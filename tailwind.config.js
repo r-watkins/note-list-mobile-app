@@ -2,7 +2,8 @@ const { hairlineWidth } = require('nativewind/theme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
+  // No darkMode toggle: the app is dark-only for MVP (Task 9 decision),
+  // so global.css defines a single unconditional token set.
   content: ['./src/app/**/*.{js,jsx,ts,tsx}', './src/components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
@@ -41,6 +42,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Spec tokens (§10.2) beyond shadcn's default vocabulary:
+        elevated: 'hsl(var(--surface-elevated))', // Surface elevated #181818 - bg-elevated
+        strong: 'hsl(var(--border-strong))', // Border strong #3F3F46 - border-strong
+        dim: 'hsl(var(--dim-foreground))', // Muted text #71717A - text-dim
       },
       borderRadius: {
         lg: 'var(--radius)',

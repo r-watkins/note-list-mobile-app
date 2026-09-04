@@ -1,73 +1,43 @@
-import { DarkTheme, DefaultTheme, type Theme } from 'expo-router/react-navigation';
+import { DarkTheme, type Theme } from 'expo-router/react-navigation';
 
-// Placeholder neutral palette wired up in Task 7 - Task 9 replaces these
-// values with the spec's dark-monochrome tokens (§10.2).
+// Pantry List dark-monochrome tokens (spec §10.2). Dark-only for MVP
+// (Task 9 decision) - mirrors the HSL values in src/global.css, expressed
+// here as plain hex/rgba for React Navigation's chrome (headers, tab bars)
+// which doesn't go through NativeWind/Tailwind.
 export const THEME = {
-  light: {
-    background: 'hsl(0 0% 100%)',
-    foreground: 'hsl(0 0% 3.9%)',
-    card: 'hsl(0 0% 100%)',
-    cardForeground: 'hsl(0 0% 3.9%)',
-    popover: 'hsl(0 0% 100%)',
-    popoverForeground: 'hsl(0 0% 3.9%)',
-    primary: 'hsl(0 0% 9%)',
-    primaryForeground: 'hsl(0 0% 98%)',
-    secondary: 'hsl(0 0% 96.1%)',
-    secondaryForeground: 'hsl(0 0% 9%)',
-    muted: 'hsl(0 0% 96.1%)',
-    mutedForeground: 'hsl(0 0% 45.1%)',
-    accent: 'hsl(0 0% 96.1%)',
-    accentForeground: 'hsl(0 0% 9%)',
-    destructive: 'hsl(0 84.2% 60.2%)',
-    border: 'hsl(0 0% 89.8%)',
-    input: 'hsl(0 0% 89.8%)',
-    ring: 'hsl(0 0% 63%)',
-    radius: '0.625rem',
-  },
-  dark: {
-    background: 'hsl(0 0% 3.9%)',
-    foreground: 'hsl(0 0% 98%)',
-    card: 'hsl(0 0% 3.9%)',
-    cardForeground: 'hsl(0 0% 98%)',
-    popover: 'hsl(0 0% 3.9%)',
-    popoverForeground: 'hsl(0 0% 98%)',
-    primary: 'hsl(0 0% 98%)',
-    primaryForeground: 'hsl(0 0% 9%)',
-    secondary: 'hsl(0 0% 14.9%)',
-    secondaryForeground: 'hsl(0 0% 98%)',
-    muted: 'hsl(0 0% 14.9%)',
-    mutedForeground: 'hsl(0 0% 63.9%)',
-    accent: 'hsl(0 0% 14.9%)',
-    accentForeground: 'hsl(0 0% 98%)',
-    destructive: 'hsl(0 70.9% 59.4%)',
-    border: 'hsl(0 0% 14.9%)',
-    input: 'hsl(0 0% 14.9%)',
-    ring: 'hsl(300 0% 45%)',
-    radius: '0.625rem',
-  },
+  background: '#0A0A0A',
+  foreground: '#FAFAFA',
+  card: '#111111',
+  cardForeground: '#FAFAFA',
+  popover: '#111111',
+  popoverForeground: '#FAFAFA',
+  primary: '#FAFAFA',
+  primaryForeground: '#0A0A0A',
+  secondary: '#202020',
+  secondaryForeground: '#FAFAFA',
+  muted: '#202020',
+  mutedForeground: '#A1A1AA',
+  accent: '#202020',
+  accentForeground: '#FAFAFA',
+  destructive: '#EF4444',
+  destructiveForeground: '#FAFAFA',
+  border: '#27272A',
+  input: '#27272A',
+  ring: '#3F3F46',
+  radius: '0.875rem',
+  elevated: '#181818',
+  borderStrong: '#3F3F46',
+  dimForeground: '#71717A',
 };
 
-export const NAV_THEME: Record<'light' | 'dark', Theme> = {
-  light: {
-    ...DefaultTheme,
-    colors: {
-      background: THEME.light.background,
-      border: THEME.light.border,
-      card: THEME.light.card,
-      notification: THEME.light.destructive,
-      primary: THEME.light.primary,
-      text: THEME.light.foreground,
-    },
-  },
-  dark: {
-    ...DarkTheme,
-    colors: {
-      background: THEME.dark.background,
-      border: THEME.dark.border,
-      card: THEME.dark.card,
-      notification: THEME.dark.destructive,
-      primary: THEME.dark.primary,
-      text: THEME.dark.foreground,
-    },
+export const NAV_THEME: Theme = {
+  ...DarkTheme,
+  colors: {
+    background: THEME.background,
+    border: THEME.border,
+    card: THEME.card,
+    notification: THEME.destructive,
+    primary: THEME.primary,
+    text: THEME.foreground,
   },
 };

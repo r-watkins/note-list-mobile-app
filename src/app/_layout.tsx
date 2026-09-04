@@ -1,3 +1,5 @@
+import '../global.css';
+
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalHost } from '@rn-primitives/portal';
 import { Stack, ThemeProvider } from 'expo-router';
@@ -21,7 +23,7 @@ export default function RootLayout() {
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: THEME.background },
+              contentStyle: { flex: 1, backgroundColor: THEME.background },
             }}
           >
             <Stack.Screen name="(tabs)" />

@@ -32,6 +32,7 @@
     "react-native-svg": "15.15.4",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.10.1",
+    "sanitize-html": "^2.17.7",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^3.4.19",
     "tailwindcss-animate": "^1.0.7"
@@ -40,6 +41,7 @@
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
+    "@types/sanitize-html": "^2.16.1",
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-kit": "^1.0.0-rc.4",
     "eslint": "^9.0.0",
@@ -74,7 +76,7 @@
       "^react-native-worklets$": "<rootDir>/node_modules/react-native-worklets/lib/module/mock.js"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@gorhom|@rn-primitives|react-native-css-interop|nativewind))",
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@gorhom|@rn-primitives|react-native-css-interop|nativewind|htmlparser2|entities|domhandler|domelementtype|domutils|dom-serializer))",
       "/node_modules/react-native-reanimated/plugin/",
       "/node_modules/@react-native/babel-preset/"
     ]

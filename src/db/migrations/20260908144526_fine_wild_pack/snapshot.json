@@ -1,0 +1,610 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "34678d24-30de-4fc3-a865-86ef625f9393",
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "ddl": [
+    {
+      "name": "entries",
+      "entityType": "tables"
+    },
+    {
+      "name": "entry_labels",
+      "entityType": "tables"
+    },
+    {
+      "name": "labels",
+      "entityType": "tables"
+    },
+    {
+      "name": "list_items",
+      "entityType": "tables"
+    },
+    {
+      "name": "lists",
+      "entityType": "tables"
+    },
+    {
+      "name": "notes",
+      "entityType": "tables"
+    },
+    {
+      "name": "sublists",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "entry_type",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "archived_at",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "entries"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "entry_id",
+      "entityType": "columns",
+      "table": "entry_labels"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "label_id",
+      "entityType": "columns",
+      "table": "entry_labels"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "entry_labels"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "labels"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "labels"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "normalized_name",
+      "entityType": "columns",
+      "table": "labels"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "labels"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "labels"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "list_entry_id",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sublist_id",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "item_type",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "content",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "is_checked",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sort_order",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "list_items"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "entry_id",
+      "entityType": "columns",
+      "table": "lists"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "entry_id",
+      "entityType": "columns",
+      "table": "notes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "body_html",
+      "entityType": "columns",
+      "table": "notes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "body_plain_text",
+      "entityType": "columns",
+      "table": "notes"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "list_entry_id",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "sort_order",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "sublists"
+    },
+    {
+      "columns": ["entry_id"],
+      "tableTo": "entries",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_entry_labels_entry_id_entries_id_fk",
+      "entityType": "fks",
+      "table": "entry_labels"
+    },
+    {
+      "columns": ["label_id"],
+      "tableTo": "labels",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_entry_labels_label_id_labels_id_fk",
+      "entityType": "fks",
+      "table": "entry_labels"
+    },
+    {
+      "columns": ["list_entry_id"],
+      "tableTo": "lists",
+      "columnsTo": ["entry_id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_list_items_list_entry_id_lists_entry_id_fk",
+      "entityType": "fks",
+      "table": "list_items"
+    },
+    {
+      "columns": ["sublist_id"],
+      "tableTo": "sublists",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_list_items_sublist_id_sublists_id_fk",
+      "entityType": "fks",
+      "table": "list_items"
+    },
+    {
+      "columns": ["entry_id"],
+      "tableTo": "entries",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_lists_entry_id_entries_id_fk",
+      "entityType": "fks",
+      "table": "lists"
+    },
+    {
+      "columns": ["entry_id"],
+      "tableTo": "entries",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_notes_entry_id_entries_id_fk",
+      "entityType": "fks",
+      "table": "notes"
+    },
+    {
+      "columns": ["list_entry_id"],
+      "tableTo": "lists",
+      "columnsTo": ["entry_id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_sublists_list_entry_id_lists_entry_id_fk",
+      "entityType": "fks",
+      "table": "sublists"
+    },
+    {
+      "columns": ["entry_id", "label_id"],
+      "nameExplicit": false,
+      "name": "entry_labels_pk",
+      "entityType": "pks",
+      "table": "entry_labels"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "entries_pk",
+      "table": "entries",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "labels_pk",
+      "table": "labels",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "list_items_pk",
+      "table": "list_items",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["entry_id"],
+      "nameExplicit": false,
+      "name": "lists_pk",
+      "table": "lists",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["entry_id"],
+      "nameExplicit": false,
+      "name": "notes_pk",
+      "table": "notes",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "sublists_pk",
+      "table": "sublists",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "entry_type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "entries_entry_type_idx",
+      "entityType": "indexes",
+      "table": "entries"
+    },
+    {
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "entries_updated_at_idx",
+      "entityType": "indexes",
+      "table": "entries"
+    },
+    {
+      "columns": [
+        {
+          "value": "\"title\" collate nocase",
+          "isExpression": true
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "entries_title_nocase_idx",
+      "entityType": "indexes",
+      "table": "entries"
+    },
+    {
+      "columns": [
+        {
+          "value": "list_entry_id",
+          "isExpression": false
+        },
+        {
+          "value": "sublist_id",
+          "isExpression": false
+        },
+        {
+          "value": "sort_order",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "list_items_list_entry_id_sublist_id_sort_order_idx",
+      "entityType": "indexes",
+      "table": "list_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "\"content\" collate nocase",
+          "isExpression": true
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "list_items_content_nocase_idx",
+      "entityType": "indexes",
+      "table": "list_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "list_entry_id",
+          "isExpression": false
+        },
+        {
+          "value": "sort_order",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "sublists_list_entry_id_sort_order_idx",
+      "entityType": "indexes",
+      "table": "sublists"
+    },
+    {
+      "columns": [
+        {
+          "value": "\"title\" collate nocase",
+          "isExpression": true
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "sublists_title_nocase_idx",
+      "entityType": "indexes",
+      "table": "sublists"
+    },
+    {
+      "columns": ["normalized_name"],
+      "nameExplicit": false,
+      "name": "labels_normalized_name_unique",
+      "entityType": "uniques",
+      "table": "labels"
+    }
+  ],
+  "renames": []
+}

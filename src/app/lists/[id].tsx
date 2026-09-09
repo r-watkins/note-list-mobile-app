@@ -3,15 +3,23 @@ import { MoreVertical } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { EditItemDialog } from '@/components/lists/edit-item-dialog';
 import { ListItemRowView } from '@/components/lists/list-item-row';
 import { ListOverflowMenu } from '@/components/lists/list-overflow-menu';
 import { QuickAddRow } from '@/components/lists/quick-add-row';
+import { RenameDialog } from '@/components/lists/rename-dialog';
 import { SublistSection } from '@/components/lists/sublist-section';
 import { nextSortOrder, useListDetail } from '@/features/lists/list.hooks';
-import { insertListItem, updateListItem } from '@/features/lists/list.repository';
+import {
+  insertListItem,
+  insertSublist,
+  updateListItem,
+  type ListItemRow,
+} from '@/features/lists/list.repository';
 import { generateId } from '@/lib/id';
 
 export default function ListDetailScreen() {
@@ -19,6 +27,8 @@ export default function ListDetailScreen() {
   const router = useRouter();
   const { entry, rootItems, sublists } = useListDetail(id);
   const [overflowOpen, setOverflowOpen] = useState(false);
+  const [addSublistOpen, setAddSublistOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<ListItemRow | null>(null);
 
   if (!entry) {
     return (
@@ -60,6 +70,16 @@ export default function ListDetailScreen() {
     });
   };
 
+  const handleAddSublist = (title: string) => {
+    insertSublist({
+      id: generateId(),
+      listEntryId: entry.id,
+      title,
+      sortOrder: nextSortOrder(sublists),
+      now: new Date(),
+    });
+  };
+
   return (
     <>
       <Stack.Screen
@@ -88,6 +108,7 @@ export default function ListDetailScreen() {
                     key={item.id}
                     item={item}
                     onToggle={(checked) => handleToggleItem(item.id, checked)}
+                    onEdit={() => setEditingItem(item)}
                   />
                 ))}
               </View>
@@ -102,8 +123,13 @@ export default function ListDetailScreen() {
             sublist={sublist}
             onToggleItem={handleToggleItem}
             onAddItem={(content) => handleAddSublistItem(sublist.id, content)}
+            onEditItem={setEditingItem}
           />
         ))}
+
+        <Button variant="outline" className="mx-4" onPress={() => setAddSublistOpen(true)}>
+          <Text>Add sublist</Text>
+        </Button>
       </ScrollView>
       <ListOverflowMenu
         open={overflowOpen}
@@ -112,6 +138,27 @@ export default function ListDetailScreen() {
         listTitle={entry.title}
         onDeleted={() => router.back()}
       />
+      <RenameDialog
+        key={addSublistOpen ? 'open' : 'closed'}
+        open={addSublistOpen}
+        onOpenChange={setAddSublistOpen}
+        title="Add sublist"
+        initialValue=""
+        placeholder="Sublist title"
+        submitLabel="Add"
+        onSubmit={handleAddSublist}
+      />
+      {editingItem ? (
+        <EditItemDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingItem(null);
+            }
+          }}
+          item={editingItem}
+        />
+      ) : null}
     </>
   );
 }

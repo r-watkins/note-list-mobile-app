@@ -8,17 +8,19 @@ import { Text } from '@/components/ui/text';
 import { QuickAddRow } from '@/components/lists/quick-add-row';
 import { ListItemRowView } from '@/components/lists/list-item-row';
 import { SublistOverflowMenu } from '@/components/lists/sublist-overflow-menu';
-import type { SublistWithItems } from '@/features/lists/list.repository';
+import type { ListItemRow, SublistWithItems } from '@/features/lists/list.repository';
 
 /** A named grouping within a list (spec §5.3): title, checked/total progress, items, quick-add. */
 export function SublistSection({
   sublist,
   onToggleItem,
   onAddItem,
+  onEditItem,
 }: {
   sublist: SublistWithItems;
   onToggleItem: (itemId: string, isChecked: boolean) => void;
   onAddItem: (content: string) => void;
+  onEditItem: (item: ListItemRow) => void;
 }) {
   const checkboxItems = sublist.items.filter((item) => item.itemType === 'checkbox');
   const checkedCount = checkboxItems.filter((item) => item.isChecked).length;
@@ -56,6 +58,7 @@ export function SublistSection({
                 key={item.id}
                 item={item}
                 onToggle={(checked) => onToggleItem(item.id, checked)}
+                onEdit={() => onEditItem(item)}
               />
             ))}
           </View>

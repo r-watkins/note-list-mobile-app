@@ -1,6 +1,5 @@
 import '../global.css';
 
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalHost } from '@rn-primitives/portal';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack, ThemeProvider } from 'expo-router';
@@ -55,17 +54,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: THEME.background }}>
       <ThemeProvider value={NAV_THEME}>
-        <BottomSheetModalProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { flex: 1, backgroundColor: THEME.background },
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-          <PortalHost />
-        </BottomSheetModalProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { flex: 1, backgroundColor: THEME.background },
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+        <PortalHost />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

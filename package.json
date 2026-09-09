@@ -3,7 +3,6 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
-    "@gorhom/bottom-sheet": "^5.2.14",
     "@rn-primitives/checkbox": "^1.5.2",
     "@rn-primitives/dialog": "^1.5.2",
     "@rn-primitives/portal": "^1.5.3",

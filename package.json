@@ -75,7 +75,8 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
-      "^react-native-worklets$": "<rootDir>/node_modules/react-native-worklets/lib/module/mock.js"
+      "^react-native-worklets$": "<rootDir>/node_modules/react-native-worklets/lib/module/mock.js",
+      "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js"
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@gorhom|@rn-primitives|react-native-css-interop|nativewind|htmlparser2|entities|domhandler|domelementtype|domutils|dom-serializer))",

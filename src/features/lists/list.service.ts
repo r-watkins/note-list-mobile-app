@@ -115,7 +115,11 @@ export function bulkSetChecked(
 }
 
 /** Index a move would land on among ordered siblings, or -1 if it's a no-op (already at an edge). */
-function moveTargetIndex(siblingCount: number, currentIndex: number, direction: MoveDirection): number {
+function moveTargetIndex(
+  siblingCount: number,
+  currentIndex: number,
+  direction: MoveDirection,
+): number {
   const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
   if (currentIndex === -1 || targetIndex < 0 || targetIndex >= siblingCount) {
     return -1;

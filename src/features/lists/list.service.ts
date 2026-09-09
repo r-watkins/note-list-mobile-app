@@ -2,13 +2,22 @@ import { db, type DbClient } from '@/db/client';
 import {
   countCheckboxItems,
   deleteListEntry,
+  getListItemById,
+  getListItemSiblings,
+  getSublistById,
+  getSublistSiblings,
   insertListEntry,
   insertListItem,
   insertSublist,
   setAllChecked,
+  updateListItem,
+  updateSublistSortOrder,
   type BulkCheckScope,
 } from '@/features/lists/list.repository';
 import { generateId } from '@/lib/id';
+
+/** MVP reordering (spec §11.2): explicit move actions, no drag-and-drop. */
+export type MoveDirection = 'up' | 'down';
 
 /**
  * Confirm "check all"/"uncheck all" only when more than this many items would actually
@@ -102,5 +111,65 @@ export function bulkSetChecked(
   const now = new Date();
   executor.transaction((tx) => {
     setAllChecked(scope, isChecked, now, tx);
+  });
+}
+
+/** Index a move would land on among ordered siblings, or -1 if it's a no-op (already at an edge). */
+function moveTargetIndex(siblingCount: number, currentIndex: number, direction: MoveDirection): number {
+  const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+  if (currentIndex === -1 || targetIndex < 0 || targetIndex >= siblingCount) {
+    return -1;
+  }
+  return targetIndex;
+}
+
+/**
+ * Moves an item up/down within its container (root items of a list, or one sublist's items)
+ * by swapping sort_order with the adjacent sibling. No-op at either edge (spec §11.2 MVP).
+ */
+export function moveListItem(
+  itemId: string,
+  direction: MoveDirection,
+  executor: DbClient = db,
+): void {
+  executor.transaction((tx) => {
+    const item = getListItemById(itemId, tx);
+    if (!item) {
+      return;
+    }
+    const siblings = getListItemSiblings(item.listEntryId, item.sublistId, tx);
+    const currentIndex = siblings.findIndex((sibling) => sibling.id === itemId);
+    const targetIndex = moveTargetIndex(siblings.length, currentIndex, direction);
+    if (targetIndex === -1) {
+      return;
+    }
+    const target = siblings[targetIndex];
+    const now = new Date();
+    updateListItem(item.id, { sortOrder: target.sortOrder }, now, tx);
+    updateListItem(target.id, { sortOrder: item.sortOrder }, now, tx);
+  });
+}
+
+/** Moves a sublist up/down within its list by swapping sort_order with the adjacent sibling. */
+export function moveSublist(
+  sublistId: string,
+  direction: MoveDirection,
+  executor: DbClient = db,
+): void {
+  executor.transaction((tx) => {
+    const sublist = getSublistById(sublistId, tx);
+    if (!sublist) {
+      return;
+    }
+    const siblings = getSublistSiblings(sublist.listEntryId, tx);
+    const currentIndex = siblings.findIndex((sibling) => sibling.id === sublistId);
+    const targetIndex = moveTargetIndex(siblings.length, currentIndex, direction);
+    if (targetIndex === -1) {
+      return;
+    }
+    const target = siblings[targetIndex];
+    const now = new Date();
+    updateSublistSortOrder(sublist.id, target.sortOrder, now, tx);
+    updateSublistSortOrder(target.id, sublist.sortOrder, now, tx);
   });
 }

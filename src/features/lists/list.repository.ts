@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 
 import { db, type DbClient } from '@/db/client';
 import { entries, listItems, lists, sublists } from '@/db/schema';
@@ -140,6 +140,33 @@ export function updateSublistTitle(
   executor.update(sublists).set({ title, updatedAt: now }).where(eq(sublists.id, sublistId)).run();
 }
 
+export function updateSublistSortOrder(
+  sublistId: string,
+  sortOrder: number,
+  now: Date,
+  executor: DbClient = db,
+): void {
+  executor
+    .update(sublists)
+    .set({ sortOrder, updatedAt: now })
+    .where(eq(sublists.id, sublistId))
+    .run();
+}
+
+export function getSublistById(sublistId: string, executor: DbClient = db): SublistRow | undefined {
+  return executor.select().from(sublists).where(eq(sublists.id, sublistId)).get();
+}
+
+/** A sublist's siblings within the same list, in sort order - used to compute move targets. */
+export function getSublistSiblings(listEntryId: string, executor: DbClient = db): SublistRow[] {
+  return executor
+    .select()
+    .from(sublists)
+    .where(eq(sublists.listEntryId, listEntryId))
+    .orderBy(asc(sublists.sortOrder))
+    .all();
+}
+
 /** Deletes the sublist; `onDelete: 'cascade'` removes its items. */
 export function deleteSublist(sublistId: string, executor: DbClient = db): void {
   executor.delete(sublists).where(eq(sublists.id, sublistId)).run();
@@ -205,6 +232,32 @@ export function updateListItem(
 
 export function deleteListItem(itemId: string, executor: DbClient = db): void {
   executor.delete(listItems).where(eq(listItems.id, itemId)).run();
+}
+
+export function getListItemById(itemId: string, executor: DbClient = db): ListItemRow | undefined {
+  return executor.select().from(listItems).where(eq(listItems.id, itemId)).get();
+}
+
+/**
+ * An item's siblings within the same container - root items of a list (`sublistId: null`)
+ * or items of one sublist - in sort order. Used to compute move targets.
+ */
+export function getListItemSiblings(
+  listEntryId: string,
+  sublistId: string | null,
+  executor: DbClient = db,
+): ListItemRow[] {
+  return executor
+    .select()
+    .from(listItems)
+    .where(
+      and(
+        eq(listItems.listEntryId, listEntryId),
+        sublistId === null ? isNull(listItems.sublistId) : eq(listItems.sublistId, sublistId),
+      ),
+    )
+    .orderBy(asc(listItems.sortOrder))
+    .all();
 }
 
 /** Counts checkbox items in scope, optionally narrowed to a current checked state. */

@@ -1,4 +1,4 @@
-import { MoreVertical } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, MoreVertical } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -16,11 +16,23 @@ export function SublistSection({
   onToggleItem,
   onAddItem,
   onEditItem,
+  onMoveItemUp,
+  onMoveItemDown,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
 }: {
   sublist: SublistWithItems;
   onToggleItem: (itemId: string, isChecked: boolean) => void;
   onAddItem: (content: string) => void;
   onEditItem: (item: ListItemRow) => void;
+  onMoveItemUp: (itemId: string) => void;
+  onMoveItemDown: (itemId: string) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }) {
   const checkboxItems = sublist.items.filter((item) => item.itemType === 'checkbox');
   const checkedCount = checkboxItems.filter((item) => item.isChecked).length;
@@ -35,6 +47,28 @@ export function SublistSection({
             {checkedCount}/{checkboxItems.length}
           </Text>
         ) : null}
+        <View className="flex-col">
+          <Pressable
+            onPress={onMoveUp}
+            disabled={isFirst}
+            accessibilityRole="button"
+            accessibilityLabel={`Move ${sublist.title} sublist up`}
+            accessibilityState={{ disabled: isFirst }}
+            className="h-9 w-9 items-center justify-center"
+          >
+            <Icon as={ChevronUp} size={16} className={isFirst ? 'opacity-30' : undefined} />
+          </Pressable>
+          <Pressable
+            onPress={onMoveDown}
+            disabled={isLast}
+            accessibilityRole="button"
+            accessibilityLabel={`Move ${sublist.title} sublist down`}
+            accessibilityState={{ disabled: isLast }}
+            className="h-9 w-9 items-center justify-center"
+          >
+            <Icon as={ChevronDown} size={16} className={isLast ? 'opacity-30' : undefined} />
+          </Pressable>
+        </View>
         <Pressable
           onPress={() => setOverflowOpen(true)}
           accessibilityLabel={`${sublist.title} actions`}
@@ -53,12 +87,16 @@ export function SublistSection({
       <CardContent className="gap-0 px-0 pb-2">
         {sublist.items.length > 0 ? (
           <View className="border-t border-border">
-            {sublist.items.map((item) => (
+            {sublist.items.map((item, index) => (
               <ListItemRowView
                 key={item.id}
                 item={item}
                 onToggle={(checked) => onToggleItem(item.id, checked)}
                 onEdit={() => onEditItem(item)}
+                onMoveUp={() => onMoveItemUp(item.id)}
+                onMoveDown={() => onMoveItemDown(item.id)}
+                isFirst={index === 0}
+                isLast={index === sublist.items.length - 1}
               />
             ))}
           </View>

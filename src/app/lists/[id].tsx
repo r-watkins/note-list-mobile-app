@@ -20,6 +20,7 @@ import {
   updateListItem,
   type ListItemRow,
 } from '@/features/lists/list.repository';
+import { moveListItem, moveSublist, type MoveDirection } from '@/features/lists/list.service';
 import { generateId } from '@/lib/id';
 
 export default function ListDetailScreen() {
@@ -80,6 +81,14 @@ export default function ListDetailScreen() {
     });
   };
 
+  const handleMoveItem = (itemId: string, direction: MoveDirection) => {
+    moveListItem(itemId, direction);
+  };
+
+  const handleMoveSublist = (sublistId: string, direction: MoveDirection) => {
+    moveSublist(sublistId, direction);
+  };
+
   return (
     <>
       <Stack.Screen
@@ -103,12 +112,16 @@ export default function ListDetailScreen() {
           <CardContent className="gap-0 px-0 pb-2">
             {rootItems.length > 0 ? (
               <View className="border-border border-t">
-                {rootItems.map((item) => (
+                {rootItems.map((item, index) => (
                   <ListItemRowView
                     key={item.id}
                     item={item}
                     onToggle={(checked) => handleToggleItem(item.id, checked)}
                     onEdit={() => setEditingItem(item)}
+                    onMoveUp={() => handleMoveItem(item.id, 'up')}
+                    onMoveDown={() => handleMoveItem(item.id, 'down')}
+                    isFirst={index === 0}
+                    isLast={index === rootItems.length - 1}
                   />
                 ))}
               </View>
@@ -117,13 +130,19 @@ export default function ListDetailScreen() {
           </CardContent>
         </Card>
 
-        {sublists.map((sublist) => (
+        {sublists.map((sublist, index) => (
           <SublistSection
             key={sublist.id}
             sublist={sublist}
             onToggleItem={handleToggleItem}
             onAddItem={(content) => handleAddSublistItem(sublist.id, content)}
             onEditItem={setEditingItem}
+            onMoveItemUp={(itemId) => handleMoveItem(itemId, 'up')}
+            onMoveItemDown={(itemId) => handleMoveItem(itemId, 'down')}
+            onMoveUp={() => handleMoveSublist(sublist.id, 'up')}
+            onMoveDown={() => handleMoveSublist(sublist.id, 'down')}
+            isFirst={index === 0}
+            isLast={index === sublists.length - 1}
           />
         ))}
 

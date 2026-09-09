@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { deleteListItem, updateListItem, type ListItemRow } from '@/features/lists/list.repository';
+import { runWrite } from '@/lib/errors';
 
 /** Edit an item's text and checkbox/text type (spec §5.2, §11.2), or delete it. */
 export function EditItemDialog({
@@ -31,20 +32,28 @@ export function EditItemDialog({
     if (trimmed.length === 0) {
       return;
     }
-    updateListItem(
-      item.id,
-      // A text item's checked state is never meaningful (spec §8.1) - clear it on switching.
-      { content: trimmed, itemType, isChecked: itemType === 'checkbox' ? item.isChecked : false },
-      new Date(),
+    const result = runWrite(() =>
+      updateListItem(
+        item.id,
+        // A text item's checked state is never meaningful (spec §8.1) - clear it on switching.
+        { content: trimmed, itemType, isChecked: itemType === 'checkbox' ? item.isChecked : false },
+        new Date(),
+      ),
     );
-    onOpenChange(false);
+    if (result.ok) {
+      onOpenChange(false);
+    }
   };
 
   const handleDelete = () => {
     onOpenChange(false);
     Alert.alert('Delete item?', `This will permanently delete "${item.content}".`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteListItem(item.id) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => runWrite(() => deleteListItem(item.id)),
+      },
     ]);
   };
 

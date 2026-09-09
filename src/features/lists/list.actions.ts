@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 
 import { type BulkCheckScope } from '@/features/lists/list.repository';
 import { bulkSetChecked, getBulkCheckImpact } from '@/features/lists/list.service';
+import { runWrite } from '@/lib/errors';
 
 /**
  * Runs check-all/uncheck-all at the given scope, confirming first only when more than
@@ -10,7 +11,7 @@ import { bulkSetChecked, getBulkCheckImpact } from '@/features/lists/list.servic
  */
 export function confirmedBulkSetChecked(scope: BulkCheckScope, isChecked: boolean): void {
   const impact = getBulkCheckImpact(scope, isChecked);
-  const apply = () => bulkSetChecked(scope, isChecked);
+  const apply = () => runWrite(() => bulkSetChecked(scope, isChecked));
 
   if (!impact.requiresConfirmation) {
     apply();

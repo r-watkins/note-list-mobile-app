@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { createList } from '@/features/lists/list.service';
+import { runWrite } from '@/lib/errors';
 
 /** Create a new list: just a title. Items/sublists are added on the detail screen after. */
 export default function NewListScreen() {
@@ -17,8 +18,10 @@ export default function NewListScreen() {
     if (trimmed.length === 0) {
       return;
     }
-    const id = createList({ title: trimmed });
-    router.replace({ pathname: '/lists/[id]', params: { id } });
+    const result = runWrite(() => createList({ title: trimmed }));
+    if (result.ok) {
+      router.replace({ pathname: '/lists/[id]', params: { id: result.value } });
+    }
   };
 
   return (

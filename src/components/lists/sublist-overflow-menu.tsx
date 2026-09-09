@@ -11,6 +11,7 @@ import {
   getSublistItemCount,
   updateSublistTitle,
 } from '@/features/lists/list.repository';
+import { runWrite } from '@/lib/errors';
 
 /**
  * A sublist header's overflow menu (spec §5.3, §5.4): check all / uncheck all / rename /
@@ -34,7 +35,7 @@ export function SublistOverflowMenu({
     onOpenChange(false);
     const itemCount = getSublistItemCount(sublistId);
     if (itemCount === 0) {
-      deleteSublist(sublistId);
+      runWrite(() => deleteSublist(sublistId));
       return;
     }
     Alert.alert(
@@ -42,7 +43,11 @@ export function SublistOverflowMenu({
       `This will permanently delete "${sublistTitle}" and its ${itemCount} item${itemCount === 1 ? '' : 's'}.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteSublist(sublistId) },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => runWrite(() => deleteSublist(sublistId)),
+        },
       ],
     );
   };
@@ -95,7 +100,7 @@ export function SublistOverflowMenu({
         onOpenChange={setRenameOpen}
         title="Rename sublist"
         initialValue={sublistTitle}
-        onSubmit={(newTitle) => updateSublistTitle(sublistId, newTitle, new Date())}
+        onSubmit={(newTitle) => runWrite(() => updateSublistTitle(sublistId, newTitle, new Date()))}
       />
     </>
   );

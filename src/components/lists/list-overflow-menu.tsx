@@ -8,6 +8,7 @@ import { RenameDialog } from '@/components/lists/rename-dialog';
 import { confirmedBulkSetChecked } from '@/features/lists/list.actions';
 import { updateListEntryTitle } from '@/features/lists/list.repository';
 import { deleteList } from '@/features/lists/list.service';
+import { runWrite } from '@/lib/errors';
 
 /**
  * The list detail screen's overflow menu (spec §5.4, §11.2): check all / uncheck all /
@@ -42,8 +43,10 @@ export function ListOverflowMenu({
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            deleteList(entryId);
-            onDeleted();
+            const result = runWrite(() => deleteList(entryId));
+            if (result.ok) {
+              onDeleted();
+            }
           },
         },
       ],
@@ -98,7 +101,7 @@ export function ListOverflowMenu({
         onOpenChange={setRenameOpen}
         title="Rename list"
         initialValue={listTitle}
-        onSubmit={(newTitle) => updateListEntryTitle(entryId, newTitle, new Date())}
+        onSubmit={(newTitle) => runWrite(() => updateListEntryTitle(entryId, newTitle, new Date()))}
       />
     </>
   );

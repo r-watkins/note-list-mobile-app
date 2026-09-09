@@ -21,6 +21,7 @@ import {
   type ListItemRow,
 } from '@/features/lists/list.repository';
 import { moveListItem, moveSublist, type MoveDirection } from '@/features/lists/list.service';
+import { runWrite } from '@/lib/errors';
 import { generateId } from '@/lib/id';
 
 export default function ListDetailScreen() {
@@ -43,50 +44,56 @@ export default function ListDetailScreen() {
   }
 
   const handleToggleItem = (itemId: string, isChecked: boolean) => {
-    updateListItem(itemId, { isChecked }, new Date());
+    runWrite(() => updateListItem(itemId, { isChecked }, new Date()));
   };
 
   const handleAddRootItem = (content: string) => {
-    insertListItem({
-      id: generateId(),
-      listEntryId: entry.id,
-      sublistId: null,
-      itemType: 'checkbox',
-      content,
-      sortOrder: nextSortOrder(rootItems),
-      now: new Date(),
-    });
+    runWrite(() =>
+      insertListItem({
+        id: generateId(),
+        listEntryId: entry.id,
+        sublistId: null,
+        itemType: 'checkbox',
+        content,
+        sortOrder: nextSortOrder(rootItems),
+        now: new Date(),
+      }),
+    );
   };
 
   const handleAddSublistItem = (sublistId: string, content: string) => {
     const sublist = sublists.find((s) => s.id === sublistId);
-    insertListItem({
-      id: generateId(),
-      listEntryId: entry.id,
-      sublistId,
-      itemType: 'checkbox',
-      content,
-      sortOrder: nextSortOrder(sublist?.items ?? []),
-      now: new Date(),
-    });
+    runWrite(() =>
+      insertListItem({
+        id: generateId(),
+        listEntryId: entry.id,
+        sublistId,
+        itemType: 'checkbox',
+        content,
+        sortOrder: nextSortOrder(sublist?.items ?? []),
+        now: new Date(),
+      }),
+    );
   };
 
   const handleAddSublist = (title: string) => {
-    insertSublist({
-      id: generateId(),
-      listEntryId: entry.id,
-      title,
-      sortOrder: nextSortOrder(sublists),
-      now: new Date(),
-    });
+    runWrite(() =>
+      insertSublist({
+        id: generateId(),
+        listEntryId: entry.id,
+        title,
+        sortOrder: nextSortOrder(sublists),
+        now: new Date(),
+      }),
+    );
   };
 
   const handleMoveItem = (itemId: string, direction: MoveDirection) => {
-    moveListItem(itemId, direction);
+    runWrite(() => moveListItem(itemId, direction));
   };
 
   const handleMoveSublist = (sublistId: string, direction: MoveDirection) => {
-    moveSublist(sublistId, direction);
+    runWrite(() => moveSublist(sublistId, direction));
   };
 
   return (

@@ -1,4 +1,4 @@
-import { db } from '@/db/client';
+import { db, type DbClient } from '@/db/client';
 import {
   countCheckboxItems,
   deleteListEntry,
@@ -28,11 +28,11 @@ export type CreateListInput = {
  * Creates a list along with its initial root items and sublists (with their items)
  * in a single transaction (spec §9.3). Returns the new list's entry id.
  */
-export function createList(input: CreateListInput): string {
+export function createList(input: CreateListInput, executor: DbClient = db): string {
   const entryId = generateId();
   const now = new Date();
 
-  db.transaction((tx) => {
+  executor.transaction((tx) => {
     insertListEntry({ id: entryId, title: input.title, now }, tx);
 
     (input.rootItems ?? []).forEach((item, index) => {
@@ -77,8 +77,8 @@ export function createList(input: CreateListInput): string {
 }
 
 /** Deletes a list and everything under it (spec §9.3); cascade removes sublists/items. */
-export function deleteList(entryId: string): void {
-  db.transaction((tx) => {
+export function deleteList(entryId: string, executor: DbClient = db): void {
+  executor.transaction((tx) => {
     deleteListEntry(entryId, tx);
   });
 }
@@ -87,15 +87,20 @@ export function deleteList(entryId: string): void {
 export function getBulkCheckImpact(
   scope: BulkCheckScope,
   targetChecked: boolean,
+  executor: DbClient = db,
 ): { affectedCount: number; requiresConfirmation: boolean } {
-  const affectedCount = countCheckboxItems(scope, { isChecked: !targetChecked });
+  const affectedCount = countCheckboxItems(scope, { isChecked: !targetChecked }, executor);
   return { affectedCount, requiresConfirmation: affectedCount > BULK_CHECK_CONFIRM_THRESHOLD };
 }
 
 /** Checks or unchecks every checkbox item at list or sublist scope (spec §5.4, §9.3). */
-export function bulkSetChecked(scope: BulkCheckScope, isChecked: boolean): void {
+export function bulkSetChecked(
+  scope: BulkCheckScope,
+  isChecked: boolean,
+  executor: DbClient = db,
+): void {
   const now = new Date();
-  db.transaction((tx) => {
+  executor.transaction((tx) => {
     setAllChecked(scope, isChecked, now, tx);
   });
 }

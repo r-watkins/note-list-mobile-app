@@ -52,7 +52,7 @@ export function EditItemDialog({
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => runWrite(() => deleteListItem(item.id)),
+        onPress: () => runWrite(() => deleteListItem(item.id, new Date())),
       },
     ]);
   };

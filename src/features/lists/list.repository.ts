@@ -25,6 +25,16 @@ function bulkCheckScopeCondition(scope: BulkCheckScope) {
     : eq(listItems.sublistId, scope.sublistId);
 }
 
+/**
+ * Bumps a list entry's own `updatedAt` whenever its content (items/sublists) changes -
+ * not just on an explicit title rename. Without this, Library's default "last updated"
+ * sort would never reflect checking off an item or editing a sublist, since those writes
+ * only touched their own row's `updatedAt`, never the parent `entries` row's.
+ */
+function touchListEntry(listEntryId: string, now: Date, executor: DbClient): void {
+  executor.update(entries).set({ updatedAt: now }).where(eq(entries.id, listEntryId)).run();
+}
+
 /** Reads a list entry with its root items and sublists (each with their own items), in sort order. */
 export function getListWithContents(
   entryId: string,
@@ -129,6 +139,7 @@ export function insertSublist(input: InsertSublistInput, executor: DbClient = db
       updatedAt: input.now,
     })
     .run();
+  touchListEntry(input.listEntryId, input.now, executor);
 }
 
 export function updateSublistTitle(
@@ -138,6 +149,10 @@ export function updateSublistTitle(
   executor: DbClient = db,
 ): void {
   executor.update(sublists).set({ title, updatedAt: now }).where(eq(sublists.id, sublistId)).run();
+  const sublist = getSublistById(sublistId, executor);
+  if (sublist) {
+    touchListEntry(sublist.listEntryId, now, executor);
+  }
 }
 
 export function updateSublistSortOrder(
@@ -151,6 +166,10 @@ export function updateSublistSortOrder(
     .set({ sortOrder, updatedAt: now })
     .where(eq(sublists.id, sublistId))
     .run();
+  const sublist = getSublistById(sublistId, executor);
+  if (sublist) {
+    touchListEntry(sublist.listEntryId, now, executor);
+  }
 }
 
 export function getSublistById(sublistId: string, executor: DbClient = db): SublistRow | undefined {
@@ -168,8 +187,12 @@ export function getSublistSiblings(listEntryId: string, executor: DbClient = db)
 }
 
 /** Deletes the sublist; `onDelete: 'cascade'` removes its items. */
-export function deleteSublist(sublistId: string, executor: DbClient = db): void {
+export function deleteSublist(sublistId: string, now: Date, executor: DbClient = db): void {
+  const sublist = getSublistById(sublistId, executor);
   executor.delete(sublists).where(eq(sublists.id, sublistId)).run();
+  if (sublist) {
+    touchListEntry(sublist.listEntryId, now, executor);
+  }
 }
 
 /** Number of items currently in a sublist - used to decide whether delete needs confirmation. */
@@ -208,6 +231,7 @@ export function insertListItem(input: InsertListItemInput, executor: DbClient = 
       updatedAt: input.now,
     })
     .run();
+  touchListEntry(input.listEntryId, input.now, executor);
 }
 
 export type ListItemChanges = Partial<{
@@ -228,10 +252,18 @@ export function updateListItem(
     .set({ ...changes, updatedAt: now })
     .where(eq(listItems.id, itemId))
     .run();
+  const item = getListItemById(itemId, executor);
+  if (item) {
+    touchListEntry(item.listEntryId, now, executor);
+  }
 }
 
-export function deleteListItem(itemId: string, executor: DbClient = db): void {
+export function deleteListItem(itemId: string, now: Date, executor: DbClient = db): void {
+  const item = getListItemById(itemId, executor);
   executor.delete(listItems).where(eq(listItems.id, itemId)).run();
+  if (item) {
+    touchListEntry(item.listEntryId, now, executor);
+  }
 }
 
 export function getListItemById(itemId: string, executor: DbClient = db): ListItemRow | undefined {
@@ -296,4 +328,12 @@ export function setAllChecked(
       ),
     )
     .run();
+
+  const listEntryId =
+    scope.type === 'list'
+      ? scope.listEntryId
+      : getSublistById(scope.sublistId, executor)?.listEntryId;
+  if (listEntryId) {
+    touchListEntry(listEntryId, now, executor);
+  }
 }

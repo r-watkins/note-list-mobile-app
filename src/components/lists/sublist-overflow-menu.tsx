@@ -35,7 +35,7 @@ export function SublistOverflowMenu({
     onOpenChange(false);
     const itemCount = getSublistItemCount(sublistId);
     if (itemCount === 0) {
-      runWrite(() => deleteSublist(sublistId));
+      runWrite(() => deleteSublist(sublistId, new Date()));
       return;
     }
     Alert.alert(
@@ -46,7 +46,7 @@ export function SublistOverflowMenu({
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => runWrite(() => deleteSublist(sublistId)),
+          onPress: () => runWrite(() => deleteSublist(sublistId, new Date())),
         },
       ],
     );

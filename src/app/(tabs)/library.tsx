@@ -26,10 +26,20 @@ export default function LibraryScreen() {
   const [searchText, setSearchText] = useState('');
   const debouncedSearchText = useDebouncedValue(searchText, SEARCH_DEBOUNCE_MS);
   const [contentType, setContentType] = useState<LibraryContentTypeFilter>('all');
+  const [labelId, setLabelId] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState<LibrarySort>('updated-desc');
   const [filterSortOpen, setFilterSortOpen] = useState(false);
 
-  const entries = useLibraryEntries({ contentType, query: debouncedSearchText }, sort);
+  const entries = useLibraryEntries({ contentType, labelId, query: debouncedSearchText }, sort);
+
+  // Labels only ever attach to notes (spec §7.3) - reflect that in contentType too, so
+  // the dialog doesn't show a stale "Lists"/"All" selection contradicting what's showing.
+  const handleLabelIdChange = (value: string | undefined) => {
+    setLabelId(value);
+    if (value !== undefined) {
+      setContentType('note');
+    }
+  };
 
   const handlePressEntry = (entry: LibraryEntryWithLabels) => {
     // Notes have no detail screen yet (Task 41) - only list rows are pressable for now.
@@ -84,6 +94,8 @@ export default function LibraryScreen() {
         onOpenChange={setFilterSortOpen}
         contentType={contentType}
         onContentTypeChange={setContentType}
+        labelId={labelId}
+        onLabelIdChange={handleLabelIdChange}
         sort={sort}
         onSortChange={setSort}
       />

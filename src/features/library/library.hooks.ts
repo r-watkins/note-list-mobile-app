@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useMemo } from 'react';
 
@@ -11,6 +11,16 @@ import {
   type LibraryFilter,
   type LibrarySort,
 } from '@/features/library/library.repository';
+
+/**
+ * Every label, for the Library filter dialog's label picker (spec §7.3). A plain read
+ * living here rather than in a dedicated label.repository.ts/label.hooks.ts - that
+ * module doesn't exist until Task 43 builds real label CRUD; this is scoped to what
+ * Task 34's filter picker needs and can be folded into that module once it exists.
+ */
+export function useAllLabels(): LabelRow[] {
+  return useLiveQuery(db.select().from(labels).orderBy(asc(labels.name))).data;
+}
 
 /**
  * Reactive equivalent of getLibraryEntries. Composed from two useLiveQuery calls, same

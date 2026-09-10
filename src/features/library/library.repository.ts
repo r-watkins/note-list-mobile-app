@@ -87,6 +87,16 @@ function searchCondition(query: string, executor: DbClient) {
   );
 }
 
+/** Labels only ever attach to notes in MVP - filtering by label id is a plain membership check. */
+function labelFilterCondition(labelId: string, executor: DbClient) {
+  return exists(
+    executor
+      .select({ one: sql`1` })
+      .from(entryLabels)
+      .where(and(eq(entryLabels.entryId, entries.id), eq(entryLabels.labelId, labelId))),
+  );
+}
+
 function sortColumns(sort: LibrarySort) {
   switch (sort) {
     case 'updated-desc':
@@ -124,6 +134,34 @@ function getLabelsByEntryId(entryIds: string[], executor: DbClient): Map<string,
 }
 
 /**
+ * The entries query underlying getLibraryEntries, exposed unexecuted so
+ * useLibraryEntries (library.hooks.ts) can feed it straight to useLiveQuery. Always a
+ * plain `select().from(entries)` - filtering by label uses an EXISTS subquery rather
+ * than a JOIN specifically so the query's shape (and its FROM table, which is what
+ * expo-sqlite's useLiveQuery watches for reactivity) never changes across filter states.
+ */
+export function buildLibraryEntriesQuery(
+  filter: LibraryFilter,
+  sort: LibrarySort,
+  executor: DbClient = db,
+) {
+  const effectiveType: LibraryContentTypeFilter =
+    filter.labelId !== undefined ? 'note' : filter.contentType;
+  const typeCondition = effectiveType === 'all' ? undefined : eq(entries.entryType, effectiveType);
+
+  const trimmedQuery = filter.query?.trim();
+  const searchMatch = trimmedQuery ? searchCondition(trimmedQuery, executor) : undefined;
+  const labelMatch =
+    filter.labelId !== undefined ? labelFilterCondition(filter.labelId, executor) : undefined;
+
+  return executor
+    .select()
+    .from(entries)
+    .where(and(typeCondition, labelMatch, searchMatch))
+    .orderBy(...sortColumns(sort));
+}
+
+/**
  * Unified list+note entries matching the content-type/label/search filter, in the
  * requested sort order (spec §7.3, §8.3).
  */
@@ -132,29 +170,7 @@ export function getLibraryEntries(
   sort: LibrarySort,
   executor: DbClient = db,
 ): LibraryEntryWithLabels[] {
-  const effectiveType: LibraryContentTypeFilter =
-    filter.labelId !== undefined ? 'note' : filter.contentType;
-  const typeCondition = effectiveType === 'all' ? undefined : eq(entries.entryType, effectiveType);
-
-  const trimmedQuery = filter.query?.trim();
-  const searchMatch = trimmedQuery ? searchCondition(trimmedQuery, executor) : undefined;
-
-  const entryRows =
-    filter.labelId === undefined
-      ? executor
-          .select()
-          .from(entries)
-          .where(and(typeCondition, searchMatch))
-          .orderBy(...sortColumns(sort))
-          .all()
-      : executor
-          .select({ entry: entries })
-          .from(entries)
-          .innerJoin(entryLabels, eq(entryLabels.entryId, entries.id))
-          .where(and(typeCondition, eq(entryLabels.labelId, filter.labelId), searchMatch))
-          .orderBy(...sortColumns(sort))
-          .all()
-          .map((row) => row.entry);
+  const entryRows = buildLibraryEntriesQuery(filter, sort, executor).all();
 
   const labelsByEntryId = getLabelsByEntryId(
     entryRows.map((entry) => entry.id),

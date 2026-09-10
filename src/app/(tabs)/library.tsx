@@ -16,15 +16,20 @@ import type {
   LibraryEntryWithLabels,
   LibrarySort,
 } from '@/features/library/library.repository';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
+/** Spec §7.2: "debounce database-backed search by approximately 150-250ms." */
+const SEARCH_DEBOUNCE_MS = 200;
 
 export default function LibraryScreen() {
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
+  const debouncedSearchText = useDebouncedValue(searchText, SEARCH_DEBOUNCE_MS);
   const [contentType, setContentType] = useState<LibraryContentTypeFilter>('all');
   const [sort, setSort] = useState<LibrarySort>('updated-desc');
   const [filterSortOpen, setFilterSortOpen] = useState(false);
 
-  const entries = useLibraryEntries({ contentType, query: searchText }, sort);
+  const entries = useLibraryEntries({ contentType, query: debouncedSearchText }, sort);
 
   const handlePressEntry = (entry: LibraryEntryWithLabels) => {
     // Notes have no detail screen yet (Task 41) - only list rows are pressable for now.

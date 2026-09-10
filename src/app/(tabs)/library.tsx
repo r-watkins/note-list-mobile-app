@@ -4,6 +4,7 @@ import { Plus, SlidersHorizontal } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { LibraryEmptyState } from '@/components/library/library-empty-state';
 import { LibraryFilterSortDialog } from '@/components/library/library-filter-sort-dialog';
 import { LibraryResultRow } from '@/components/library/library-result-row';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,15 @@ export default function LibraryScreen() {
     }
   };
 
+  // Only true when no filter/search is active at all - in that case `entries` already
+  // is the entire, unfiltered library, so an empty result means the library itself is
+  // empty rather than that the current filter/search just has no matches.
+  const isLibraryEmpty =
+    entries.length === 0 &&
+    contentType === 'all' &&
+    labelId === undefined &&
+    debouncedSearchText.trim().length === 0;
+
   const handlePressEntry = (entry: LibraryEntryWithLabels) => {
     // Notes have no detail screen yet (Task 41) - only list rows are pressable for now.
     router.push({ pathname: '/lists/[id]', params: { id: entry.id } });
@@ -103,6 +113,14 @@ export default function LibraryScreen() {
               onPress={item.entryType === 'list' ? () => handlePressEntry(item) : undefined}
             />
           )}
+          ListEmptyComponent={
+            <LibraryEmptyState
+              isLibraryEmpty={isLibraryEmpty}
+              query={debouncedSearchText}
+              contentType={contentType}
+              labelActive={labelId !== undefined}
+            />
+          }
         />
       </View>
       <Pressable

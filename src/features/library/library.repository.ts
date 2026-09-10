@@ -1,7 +1,7 @@
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, exists, inArray, or, sql } from 'drizzle-orm';
 
 import { db, type DbClient } from '@/db/client';
-import { entries, entryLabels, labels } from '@/db/schema';
+import { entries, entryLabels, labels, listItems, sublists } from '@/db/schema';
 
 export type LibraryEntryRow = typeof entries.$inferSelect;
 export type LabelRow = typeof labels.$inferSelect;
@@ -19,7 +19,73 @@ export type LibraryFilter = {
    * stated "lists should not appear while a label filter is active" behavior.
    */
   labelId?: string;
+  /**
+   * Case-insensitive substring search (spec §8.3) - trimmed; empty/omitted matches
+   * everything (spec: "an empty query shows the normal filtered/sorted entry list").
+   * Does not search `notes.body_plain_text` - spec §8.3 marks that column optional and
+   * design.md's Task 31 scope covers only `entries.title`/`sublists.title`/
+   * `list_items.content` for lists and `entries.title`/`labels.name` for notes.
+   */
+  query?: string;
 };
+
+/** Escapes LIKE's special characters so they are matched literally, not as wildcards. */
+function escapeLikeSpecialChars(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
+
+function likePattern(query: string): string {
+  return `%${escapeLikeSpecialChars(query)}%`;
+}
+
+/**
+ * Spec §8.3's search predicate: a list matches on its own title, any of its sublists'
+ * titles, or any of its items' content; a note matches on its own title or any label
+ * attached to it. Always parameterized - drizzle binds `pattern` as a query parameter,
+ * so user search text is never interpolated directly into the SQL string - and the
+ * pattern itself has `%`/`_`/`\` escaped so the user's text can't inject LIKE wildcards.
+ */
+function searchCondition(query: string, executor: DbClient) {
+  const pattern = likePattern(query);
+  const titleMatch = sql`${entries.title} LIKE ${pattern} ESCAPE '\\'`;
+
+  const sublistMatch = exists(
+    executor
+      .select({ one: sql`1` })
+      .from(sublists)
+      .where(
+        and(
+          eq(sublists.listEntryId, entries.id),
+          sql`${sublists.title} LIKE ${pattern} ESCAPE '\\'`,
+        ),
+      ),
+  );
+  const itemMatch = exists(
+    executor
+      .select({ one: sql`1` })
+      .from(listItems)
+      .where(
+        and(
+          eq(listItems.listEntryId, entries.id),
+          sql`${listItems.content} LIKE ${pattern} ESCAPE '\\'`,
+        ),
+      ),
+  );
+  const labelMatch = exists(
+    executor
+      .select({ one: sql`1` })
+      .from(entryLabels)
+      .innerJoin(labels, eq(labels.id, entryLabels.labelId))
+      .where(
+        and(eq(entryLabels.entryId, entries.id), sql`${labels.name} LIKE ${pattern} ESCAPE '\\'`),
+      ),
+  );
+
+  return or(
+    and(eq(entries.entryType, 'list'), or(titleMatch, sublistMatch, itemMatch)),
+    and(eq(entries.entryType, 'note'), or(titleMatch, labelMatch)),
+  );
+}
 
 function sortColumns(sort: LibrarySort) {
   switch (sort) {
@@ -58,9 +124,8 @@ function getLabelsByEntryId(entryIds: string[], executor: DbClient): Map<string,
 }
 
 /**
- * Unified list+note entries matching the content-type/label filter, in the requested
- * sort order (spec §7.3). Search text matching (spec §8.3) is layered on top of this
- * by Task 31 - this function only covers filter and sort.
+ * Unified list+note entries matching the content-type/label/search filter, in the
+ * requested sort order (spec §7.3, §8.3).
  */
 export function getLibraryEntries(
   filter: LibraryFilter,
@@ -71,19 +136,22 @@ export function getLibraryEntries(
     filter.labelId !== undefined ? 'note' : filter.contentType;
   const typeCondition = effectiveType === 'all' ? undefined : eq(entries.entryType, effectiveType);
 
+  const trimmedQuery = filter.query?.trim();
+  const searchMatch = trimmedQuery ? searchCondition(trimmedQuery, executor) : undefined;
+
   const entryRows =
     filter.labelId === undefined
       ? executor
           .select()
           .from(entries)
-          .where(typeCondition)
+          .where(and(typeCondition, searchMatch))
           .orderBy(...sortColumns(sort))
           .all()
       : executor
           .select({ entry: entries })
           .from(entries)
           .innerJoin(entryLabels, eq(entryLabels.entryId, entries.id))
-          .where(and(typeCondition, eq(entryLabels.labelId, filter.labelId)))
+          .where(and(typeCondition, eq(entryLabels.labelId, filter.labelId), searchMatch))
           .orderBy(...sortColumns(sort))
           .all()
           .map((row) => row.entry);

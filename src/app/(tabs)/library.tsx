@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Plus, SlidersHorizontal } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { LibraryFilterSortDialog } from '@/components/library/library-filter-sort-dialog';
@@ -11,10 +11,11 @@ import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { useLibraryEntries } from '@/features/library/library.hooks';
-import type {
-  LibraryContentTypeFilter,
-  LibraryEntryWithLabels,
-  LibrarySort,
+import {
+  getListSearchMatchPreview,
+  type LibraryContentTypeFilter,
+  type LibraryEntryWithLabels,
+  type LibrarySort,
 } from '@/features/library/library.repository';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
@@ -31,6 +32,28 @@ export default function LibraryScreen() {
   const [filterSortOpen, setFilterSortOpen] = useState(false);
 
   const entries = useLibraryEntries({ contentType, labelId, query: debouncedSearchText }, sort);
+
+  // A list's contextual match preview (spec §7.4, e.g. "Dairy · Milk") only makes sense
+  // while actively searching, and only for list-type entries (notes show labels instead
+  // - see LibraryResultRow). Recomputed only when the result set or query text changes,
+  // not on every render, since each lookup is its own small DB read.
+  const matchPreviewByEntryId = useMemo(() => {
+    const trimmedQuery = debouncedSearchText.trim();
+    const byEntryId = new Map<string, string>();
+    if (!trimmedQuery) {
+      return byEntryId;
+    }
+    for (const entry of entries) {
+      if (entry.entryType !== 'list') {
+        continue;
+      }
+      const preview = getListSearchMatchPreview(entry, trimmedQuery);
+      if (preview) {
+        byEntryId.set(entry.id, preview);
+      }
+    }
+    return byEntryId;
+  }, [entries, debouncedSearchText]);
 
   // Labels only ever attach to notes (spec §7.3) - reflect that in contentType too, so
   // the dialog doesn't show a stale "Lists"/"All" selection contradicting what's showing.
@@ -76,6 +99,7 @@ export default function LibraryScreen() {
           renderItem={({ item }) => (
             <LibraryResultRow
               entry={item}
+              matchPreview={matchPreviewByEntryId.get(item.id)}
               onPress={item.entryType === 'list' ? () => handlePressEntry(item) : undefined}
             />
           )}

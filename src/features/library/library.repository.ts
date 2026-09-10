@@ -179,3 +179,56 @@ export function getLibraryEntries(
 
   return entryRows.map((entry) => ({ ...entry, labels: labelsByEntryId.get(entry.id) ?? [] }));
 }
+
+/**
+ * A concise "why did this list match" preview for a search result row (spec §7.4, e.g.
+ * "Dairy · Milk") - undefined when the list's own title already matched (already shown
+ * as the row's title, so no extra context is needed) or when nothing else matches
+ * either. Priority when the title itself doesn't match: a sublist title match (shown
+ * alone, e.g. "Dairy" - spec's own "searching dairy" example), else an item content
+ * match (shown as "<its sublist title> · <content>", or just "<content>" for a root
+ * item) - the first match found in each case, ordered by sort_order.
+ */
+export function getListSearchMatchPreview(
+  entry: { id: string; title: string },
+  query: string,
+  executor: DbClient = db,
+): string | undefined {
+  if (entry.title.toLowerCase().includes(query.toLowerCase())) {
+    return undefined;
+  }
+
+  const pattern = likePattern(query);
+
+  const sublistMatch = executor
+    .select({ title: sublists.title })
+    .from(sublists)
+    .where(
+      and(eq(sublists.listEntryId, entry.id), sql`${sublists.title} LIKE ${pattern} ESCAPE '\\'`),
+    )
+    .orderBy(asc(sublists.sortOrder))
+    .get();
+  if (sublistMatch) {
+    return sublistMatch.title;
+  }
+
+  const itemMatch = executor
+    .select({ content: listItems.content, sublistTitle: sublists.title })
+    .from(listItems)
+    .leftJoin(sublists, eq(sublists.id, listItems.sublistId))
+    .where(
+      and(
+        eq(listItems.listEntryId, entry.id),
+        sql`${listItems.content} LIKE ${pattern} ESCAPE '\\'`,
+      ),
+    )
+    .orderBy(asc(listItems.sortOrder))
+    .get();
+  if (itemMatch) {
+    return itemMatch.sublistTitle
+      ? `${itemMatch.sublistTitle} · ${itemMatch.content}`
+      : itemMatch.content;
+  }
+
+  return undefined;
+}

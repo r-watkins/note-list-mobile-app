@@ -1,4 +1,5 @@
 import { db, type DbClient } from '@/db/client';
+import { applyEntryLabelDiff } from '@/features/labels/label.service';
 import {
   insertNoteEntry,
   updateNoteBody,
@@ -7,12 +8,13 @@ import {
 import { deriveNotePlainText, sanitizeNoteHtml } from '@/lib/html/sanitize';
 import { generateId } from '@/lib/id';
 
-export type CreateNoteInput = { title: string; bodyHtml: string };
+export type CreateNoteInput = { title: string; bodyHtml: string; labelIds?: string[] };
 
 /**
  * Creates a note entry, sanitizing the editor's raw HTML (Task 16's allowlist) and deriving
  * `body_plain_text` from the sanitized result before persisting either - never the raw editor
- * output. Returns the new entry's id.
+ * output. Applies the initial label selection (Task 45) in the same transaction, so a note
+ * and its labels are never observably created apart. Returns the new entry's id.
  */
 export function createNote(input: CreateNoteInput, executor: DbClient = db): string {
   const id = generateId();
@@ -22,6 +24,9 @@ export function createNote(input: CreateNoteInput, executor: DbClient = db): str
 
   executor.transaction((tx) => {
     insertNoteEntry({ id, title: input.title, bodyHtml, bodyPlainText, now }, tx);
+    if (input.labelIds && input.labelIds.length > 0) {
+      applyEntryLabelDiff(id, input.labelIds, now, tx);
+    }
   });
 
   return id;
@@ -42,11 +47,13 @@ export function saveNoteBody(entryId: string, rawHtml: string, executor: DbClien
   });
 }
 
-export type UpdateNoteInput = { title: string; bodyHtml: string };
+export type UpdateNoteInput = { title: string; bodyHtml: string; labelIds?: string[] };
 
 /**
- * Saves the edit screen's single Save action: title and body together, in one transaction
- * with one `updatedAt`, so they never appear to have updated at slightly different times.
+ * Saves the edit screen's single Save action: title, body, and labels together, in one
+ * transaction with one `updatedAt`. `labelIds` is optional and, when given, replaces the
+ * note's full label set (undefined leaves existing associations untouched, for any future
+ * caller that only wants to change title/body).
  */
 export function updateNote(entryId: string, input: UpdateNoteInput, executor: DbClient = db): void {
   const now = new Date();
@@ -56,5 +63,8 @@ export function updateNote(entryId: string, input: UpdateNoteInput, executor: Db
   executor.transaction((tx) => {
     updateNoteEntryTitle(entryId, input.title, now, tx);
     updateNoteBody(entryId, { bodyHtml, bodyPlainText }, now, tx);
+    if (input.labelIds !== undefined) {
+      applyEntryLabelDiff(entryId, input.labelIds, now, tx);
+    }
   });
 }

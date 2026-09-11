@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 
 import { NoteEditorBody, NoteEditorToolbar, useNoteEditor } from '@/components/notes/note-editor';
+import { NoteLabelPicker } from '@/components/notes/note-label-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
@@ -23,9 +24,10 @@ export default function NewNoteScreen() {
   const navigation = useNavigation();
   const [title, setTitle] = useState('');
   const [bodyDirty, setBodyDirty] = useState(false);
+  const [labelIds, setLabelIds] = useState<string[]>([]);
   const editor = useNoteEditor({ onChange: () => setBodyDirty(true) });
 
-  const isDirty = title.trim().length > 0 || bodyDirty;
+  const isDirty = title.trim().length > 0 || bodyDirty || labelIds.length > 0;
   const isDirtyRef = useRef(isDirty);
   useEffect(() => {
     isDirtyRef.current = isDirty;
@@ -60,7 +62,7 @@ export default function NewNoteScreen() {
       return;
     }
     const bodyHtml = await editor.getHTML();
-    const result = runWrite(() => createNote({ title: trimmedTitle, bodyHtml }));
+    const result = runWrite(() => createNote({ title: trimmedTitle, bodyHtml, labelIds }));
     if (result.ok) {
       isDirtyRef.current = false;
       router.replace({ pathname: '/notes/[id]', params: { id: result.value } });
@@ -83,6 +85,7 @@ export default function NewNoteScreen() {
             <Text>Save</Text>
           </Button>
         </View>
+        <NoteLabelPicker selectedLabelIds={labelIds} onChange={setLabelIds} />
         <View className="flex-1">
           <NoteEditorBody editor={editor} />
         </View>

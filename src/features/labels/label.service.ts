@@ -61,25 +61,38 @@ export function removeLabel(id: string, executor: DbClient = db): void {
 }
 
 /**
- * Replaces an entry's full set of label associations in one transaction (spec §9.3) -
- * removes associations no longer present in `labelIds` and adds any new ones. Used by the
- * note editor's label-assignment UI, which always submits the complete desired set.
+ * Diffs an entry's current label associations against the desired set and applies exactly
+ * the inserts/deletes needed - no transaction of its own, so callers that already have one
+ * open (note.service.ts's createNote/updateNote, saving title/body/labels together) can
+ * call this directly instead of nesting a second transaction inside theirs.
+ */
+export function applyEntryLabelDiff(
+  entryId: string,
+  labelIds: string[],
+  now: Date,
+  executor: DbClient,
+): void {
+  const desired = new Set(labelIds);
+  const current = new Set(getEntryLabelIds(entryId, executor));
+  for (const labelId of current) {
+    if (!desired.has(labelId)) {
+      deleteEntryLabel(entryId, labelId, executor);
+    }
+  }
+  for (const labelId of desired) {
+    if (!current.has(labelId)) {
+      insertEntryLabel(entryId, labelId, now, executor);
+    }
+  }
+}
+
+/**
+ * Replaces an entry's full set of label associations in one transaction (spec §9.3) - the
+ * standalone entry point for changing just labels (not title/body).
  */
 export function setEntryLabels(entryId: string, labelIds: string[], executor: DbClient = db): void {
   const now = new Date();
-  const desired = new Set(labelIds);
-
   executor.transaction((tx) => {
-    const current = new Set(getEntryLabelIds(entryId, tx));
-    for (const labelId of current) {
-      if (!desired.has(labelId)) {
-        deleteEntryLabel(entryId, labelId, tx);
-      }
-    }
-    for (const labelId of desired) {
-      if (!current.has(labelId)) {
-        insertEntryLabel(entryId, labelId, now, tx);
-      }
-    }
+    applyEntryLabelDiff(entryId, labelIds, now, tx);
   });
 }

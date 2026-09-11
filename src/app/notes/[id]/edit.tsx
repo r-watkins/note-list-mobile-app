@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 
 import { NoteEditorBody, NoteEditorToolbar, useNoteEditor } from '@/components/notes/note-editor';
+import { NoteLabelPicker } from '@/components/notes/note-label-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
@@ -17,25 +18,37 @@ import { runWrite } from '@/lib/errors';
  * pattern as notes/new.tsx - see its header comment for why isDirtyRef, not isDirty state,
  * is what the beforeRemove listener reads.
  */
+function labelSetsEqual(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  const bSet = new Set(b);
+  return a.every((id) => bSet.has(id));
+}
+
 function NoteEditForm({
   entryId,
   initialTitle,
   initialBodyHtml,
+  initialLabelIds,
 }: {
   entryId: string;
   initialTitle: string;
   initialBodyHtml: string;
+  initialLabelIds: string[];
 }) {
   const router = useRouter();
   const navigation = useNavigation();
   const [title, setTitle] = useState(initialTitle);
   const [bodyDirty, setBodyDirty] = useState(false);
+  const [labelIds, setLabelIds] = useState<string[]>(initialLabelIds);
   const editor = useNoteEditor({
     initialContent: initialBodyHtml,
     onChange: () => setBodyDirty(true),
   });
 
-  const isDirty = title.trim() !== initialTitle || bodyDirty;
+  const isDirty =
+    title.trim() !== initialTitle || bodyDirty || !labelSetsEqual(labelIds, initialLabelIds);
   const isDirtyRef = useRef(isDirty);
   useEffect(() => {
     isDirtyRef.current = isDirty;
@@ -70,7 +83,7 @@ function NoteEditForm({
       return;
     }
     const bodyHtml = await editor.getHTML();
-    const result = runWrite(() => updateNote(entryId, { title: trimmedTitle, bodyHtml }));
+    const result = runWrite(() => updateNote(entryId, { title: trimmedTitle, bodyHtml, labelIds }));
     if (result.ok) {
       isDirtyRef.current = false;
       router.replace({ pathname: '/notes/[id]', params: { id: entryId } });
@@ -92,6 +105,7 @@ function NoteEditForm({
             <Text>Save</Text>
           </Button>
         </View>
+        <NoteLabelPicker selectedLabelIds={labelIds} onChange={setLabelIds} />
         <View className="flex-1">
           <NoteEditorBody editor={editor} />
         </View>
@@ -103,7 +117,7 @@ function NoteEditForm({
 
 export default function NoteEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { entry, note } = useNoteDetail(id);
+  const { entry, note, labels } = useNoteDetail(id);
 
   if (!entry || !note) {
     return (
@@ -117,6 +131,11 @@ export default function NoteEditScreen() {
   }
 
   return (
-    <NoteEditForm entryId={entry.id} initialTitle={entry.title} initialBodyHtml={note.bodyHtml} />
+    <NoteEditForm
+      entryId={entry.id}
+      initialTitle={entry.title}
+      initialBodyHtml={note.bodyHtml}
+      initialLabelIds={labels.map((label) => label.id)}
+    />
   );
 }

@@ -75,8 +75,11 @@ export default function LibraryScreen() {
     debouncedSearchText.trim().length === 0;
 
   const handlePressEntry = (entry: LibraryEntryWithLabels) => {
-    // Notes have no detail screen yet (Task 41) - only list rows are pressable for now.
-    router.push({ pathname: '/lists/[id]', params: { id: entry.id } });
+    if (entry.entryType === 'list') {
+      router.push({ pathname: '/lists/[id]', params: { id: entry.id } });
+    } else {
+      router.push({ pathname: '/notes/[id]', params: { id: entry.id } });
+    }
   };
 
   return (
@@ -110,7 +113,7 @@ export default function LibraryScreen() {
             <LibraryResultRow
               entry={item}
               matchPreview={matchPreviewByEntryId.get(item.id)}
-              onPress={item.entryType === 'list' ? () => handlePressEntry(item) : undefined}
+              onPress={() => handlePressEntry(item)}
             />
           )}
           ListEmptyComponent={

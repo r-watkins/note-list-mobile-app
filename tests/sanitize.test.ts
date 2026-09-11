@@ -4,7 +4,8 @@ describe('sanitizeNoteHtml', () => {
   it('preserves the allowed formatting tags', () => {
     const input =
       '<h1>Title</h1><p>Body <strong>bold</strong> <em>italic</em> <u>underline</u></p>' +
-      '<ul><li>one</li></ul><ol><li>two</li></ol><b>b</b><i>i</i><h2>h2</h2><h3>h3</h3><br>';
+      '<ul><li>one</li></ul><ol><li>two</li></ol><b>b</b><i>i</i><h2>h2</h2><h3>h3</h3>' +
+      '<h4>h4</h4><h5>h5</h5><h6>h6</h6><br>';
     // sanitize-html normalizes void elements to self-closing form.
     expect(sanitizeNoteHtml(input)).toBe(input.replace('<br>', '<br />'));
   });

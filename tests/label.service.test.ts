@@ -30,6 +30,13 @@ describe('createLabel', () => {
     expect(() => createLabel('DINNER', db)).toThrow(DuplicateLabelNameError);
     expect(listLabels(db)).toHaveLength(1);
   });
+
+  it('rejects a name that collides once trimmed, even with different surrounding whitespace', () => {
+    const db = createTestDb();
+    createLabel('Dinner', db);
+    expect(() => createLabel('  dinner  ', db)).toThrow(DuplicateLabelNameError);
+    expect(listLabels(db)).toHaveLength(1);
+  });
 });
 
 describe('renameLabel', () => {

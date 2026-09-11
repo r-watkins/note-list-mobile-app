@@ -2,7 +2,7 @@ import { PortalHost } from '@rn-primitives/portal';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { LibraryFilterSortDialog } from '@/components/library/library-filter-sort-dialog';
-import type { LabelRow } from '@/features/library/library.repository';
+import type { LabelRow } from '@/features/labels/label.repository';
 
 const mockLabels: LabelRow[] = [
   {
@@ -21,11 +21,11 @@ const mockLabels: LabelRow[] = [
   },
 ];
 
-// useAllLabels reads the live database (useLiveQuery), which has no Jest mock and
-// crashes under Jest (Task 14) - mocked here so this dialog can be rendered in isolation
-// without touching expo-sqlite at all.
-jest.mock('@/features/library/library.hooks', () => ({
-  useAllLabels: () => mockLabels,
+// useLabels reads the live database (useLiveQuery), which has no Jest mock and crashes
+// under Jest (Task 14) - mocked here so this dialog can be rendered in isolation without
+// touching expo-sqlite at all.
+jest.mock('@/features/labels/label.hooks', () => ({
+  useLabels: () => mockLabels,
 }));
 
 const noop = () => {};

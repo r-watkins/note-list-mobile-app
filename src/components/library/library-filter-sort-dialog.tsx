@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { useAllLabels } from '@/features/library/library.hooks';
+import { useLabels } from '@/features/labels/label.hooks';
 import type { LibraryContentTypeFilter, LibrarySort } from '@/features/library/library.repository';
 
 const CONTENT_TYPE_OPTIONS: { value: LibraryContentTypeFilter; label: string }[] = [
@@ -36,7 +36,7 @@ export function LibraryFilterSortDialog({
   sort: LibrarySort;
   onSortChange: (value: LibrarySort) => void;
 }) {
-  const labels = useAllLabels();
+  const labels = useLabels();
   const labelFilterActive = labelId !== undefined;
 
   return (

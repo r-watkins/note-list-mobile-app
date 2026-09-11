@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Alert, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ function DevSeedButton() {
   return (
     <Button
       variant="outline"
-      className="mt-4"
       onPress={() => {
         const result = seedDatabase();
         Alert.alert(
@@ -23,9 +23,14 @@ function DevSeedButton() {
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
+
   return (
-    <View className="flex-1 items-center justify-center">
+    <View className="flex-1 items-center justify-center gap-4">
       <Text className="text-xl font-semibold">Settings</Text>
+      <Button variant="outline" onPress={() => router.push('/labels')}>
+        <Text>Manage labels</Text>
+      </Button>
       {__DEV__ ? <DevSeedButton /> : null}
     </View>
   );

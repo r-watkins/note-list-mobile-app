@@ -1,7 +1,9 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Pencil } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
 
 import { NoteEditorBody, useNoteEditor } from '@/components/notes/note-editor';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useNoteDetail } from '@/features/notes/note.hooks';
 
@@ -16,6 +18,7 @@ function NoteBody({ bodyHtml }: { bodyHtml: string }) {
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { entry, note, labels } = useNoteDetail(id);
 
   if (!entry || !note) {
@@ -31,7 +34,24 @@ export default function NoteDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: entry.title }} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: entry.title,
+          headerRight: () => (
+            <Pressable
+              onPress={() =>
+                router.push({ pathname: '/notes/[id]/edit', params: { id: entry.id } })
+              }
+              accessibilityLabel="Edit note"
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center"
+            >
+              <Icon as={Pencil} />
+            </Pressable>
+          ),
+        }}
+      />
       <View className="flex-1 bg-background">
         {labels.length > 0 ? (
           <View className="flex-row flex-wrap gap-2 px-4 pt-4">

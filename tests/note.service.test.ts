@@ -1,4 +1,4 @@
-import { createNote, saveNoteBody } from '@/features/notes/note.service';
+import { createNote, saveNoteBody, updateNote } from '@/features/notes/note.service';
 import { getNoteWithBody } from '@/features/notes/note.repository';
 
 import { createTestDb } from './helpers/test-db';
@@ -41,5 +41,19 @@ describe('saveNoteBody', () => {
     expect(note.bodyHtml).toBe('<p>updated</p>');
     expect(note.bodyPlainText).toBe('updated');
     expect(note.updatedAt.getTime()).toBeGreaterThanOrEqual(originalUpdatedAt);
+  });
+});
+
+describe('updateNote', () => {
+  it('updates title and sanitized body together in one transaction', () => {
+    const db = createTestDb();
+    const id = createNote({ title: 'Original', bodyHtml: '<p>original</p>' }, db);
+
+    updateNote(id, { title: 'Renamed', bodyHtml: '<p>updated</p><script>alert(1)</script>' }, db);
+
+    const note = getNoteWithBody(id, db)!;
+    expect(note.title).toBe('Renamed');
+    expect(note.bodyHtml).toBe('<p>updated</p>');
+    expect(note.bodyPlainText).toBe('updated');
   });
 });

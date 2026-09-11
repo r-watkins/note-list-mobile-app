@@ -8,6 +8,7 @@ import { LibraryEmptyState } from '@/components/library/library-empty-state';
 import { LibraryFilterSortDialog } from '@/components/library/library-filter-sort-dialog';
 import { LibraryResultRow } from '@/components/library/library-result-row';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
@@ -31,6 +32,7 @@ export default function LibraryScreen() {
   const [labelId, setLabelId] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState<LibrarySort>('updated-desc');
   const [filterSortOpen, setFilterSortOpen] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
 
   const entries = useLibraryEntries({ contentType, labelId, query: debouncedSearchText }, sort);
 
@@ -127,13 +129,43 @@ export default function LibraryScreen() {
         />
       </View>
       <Pressable
-        onPress={() => router.push('/lists/new')}
+        onPress={() => setComposeOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel="Create new list"
+        accessibilityLabel="Create new list or note"
         className="bg-primary active:bg-primary/90 absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-black/20"
       >
         <Icon as={Plus} className="text-primary-foreground" size={24} />
       </Pressable>
+      {/* spec §4/§11.1: compose action offers "New list"/"New note" - a Dialog, not a bottom
+          sheet, per design.md Decision #12 (@gorhom/bottom-sheet doesn't present on-device
+          in this project). */}
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New</DialogTitle>
+          </DialogHeader>
+          <Button
+            variant="ghost"
+            className="justify-start"
+            onPress={() => {
+              setComposeOpen(false);
+              router.push('/lists/new');
+            }}
+          >
+            <Text>New list</Text>
+          </Button>
+          <Button
+            variant="ghost"
+            className="justify-start"
+            onPress={() => {
+              setComposeOpen(false);
+              router.push('/notes/new');
+            }}
+          >
+            <Text>New note</Text>
+          </Button>
+        </DialogContent>
+      </Dialog>
       <LibraryFilterSortDialog
         open={filterSortOpen}
         onOpenChange={setFilterSortOpen}

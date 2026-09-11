@@ -1,4 +1,4 @@
-import { sanitizeNoteHtml } from '@/lib/html/sanitize';
+import { deriveNotePlainText, sanitizeNoteHtml } from '@/lib/html/sanitize';
 
 describe('sanitizeNoteHtml', () => {
   it('preserves the allowed formatting tags', () => {
@@ -28,5 +28,25 @@ describe('sanitizeNoteHtml', () => {
 
   it('strips anchor tags but keeps their link text, neutralizing javascript: hrefs', () => {
     expect(sanitizeNoteHtml('<a href="javascript:alert(1)">link</a>')).toBe('link');
+  });
+});
+
+describe('deriveNotePlainText', () => {
+  it('joins text from adjacent block tags with a single space', () => {
+    expect(deriveNotePlainText('<h2>Ingredients</h2><ul><li>Milk</li><li>Eggs</li></ul>')).toBe(
+      'Ingredients Milk Eggs',
+    );
+  });
+
+  it('collapses runs of internal whitespace and trims the ends', () => {
+    expect(deriveNotePlainText('<p>  extra   spaces  </p>')).toBe('extra spaces');
+  });
+
+  it('returns an empty string for tags with no text content', () => {
+    expect(deriveNotePlainText('<p></p><h1></h1>')).toBe('');
+  });
+
+  it('leaves plain text with no tags unchanged', () => {
+    expect(deriveNotePlainText('Plain text with no tags')).toBe('Plain text with no tags');
   });
 });

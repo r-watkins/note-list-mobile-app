@@ -41,3 +41,15 @@ export function sanitizeNoteHtml(html: string): string {
     disallowedTagsMode: 'discard',
   });
 }
+
+/**
+ * Derives the search/preview plain-text projection (`notes.body_plain_text`) from an
+ * already-sanitized body. Safe to do with a plain tag-strip regex (no HTML parser needed)
+ * because ALLOWED_TAGS has no attributes and nothing script-like can reach this point.
+ */
+export function deriveNotePlainText(sanitizedHtml: string): string {
+  return sanitizedHtml
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}

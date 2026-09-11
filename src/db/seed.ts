@@ -1,3 +1,4 @@
+import { deriveNotePlainText } from '@/lib/html/sanitize';
 import { generateId } from '@/lib/id';
 
 import { db } from './client';
@@ -38,15 +39,6 @@ const SAMPLE_NOTES: { title: string; labelNames: string[]; bodyHtml: string }[] 
       '<p><em>Keeps in the fridge for up to 3 days.</em></p>',
   },
 ];
-
-// Minimal strip-tags helper for this dev-only seed content, not a general sanitizer.
-// Task 40 owns the real body_plain_text derivation used by the note save flow.
-function stripToPlainText(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * Dev-only seed data (spec §14): the sample Grocery List and sample notes, used to verify
@@ -135,7 +127,7 @@ export function seedDatabase(): { seeded: boolean } {
         .values({
           entryId: noteEntryId,
           bodyHtml: note.bodyHtml,
-          bodyPlainText: stripToPlainText(note.bodyHtml),
+          bodyPlainText: deriveNotePlainText(note.bodyHtml),
         })
         .run();
 

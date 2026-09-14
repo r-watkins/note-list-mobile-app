@@ -40,9 +40,17 @@ const buttonVariants = cva(
         link: '',
       },
       size: {
-        default: cn('h-10 px-4 py-2 sm:h-9', Platform.select({ web: 'has-[>svg]:px-3' })),
-        sm: cn('h-9 gap-1.5 rounded-md px-3 sm:h-8', Platform.select({ web: 'has-[>svg]:px-2.5' })),
-        lg: cn('h-11 rounded-md px-6 sm:h-10', Platform.select({ web: 'has-[>svg]:px-4' })),
+        // min-h (not h) on the text-label sizes so a button grows to fit its label under a
+        // large system font-scale setting (Dynamic Type / Android font size) instead of
+        // clipping it - a fixed h-* only reserves room for the default-scale label height.
+        default: cn('min-h-10 px-4 py-2 sm:min-h-9', Platform.select({ web: 'has-[>svg]:px-3' })),
+        sm: cn(
+          'min-h-9 gap-1.5 rounded-md px-3 sm:min-h-8',
+          Platform.select({ web: 'has-[>svg]:px-2.5' }),
+        ),
+        lg: cn('min-h-11 rounded-md px-6 sm:min-h-10', Platform.select({ web: 'has-[>svg]:px-4' })),
+        // Fixed square, unlike the label sizes above - these hold only an icon, which
+        // doesn't scale with the system font setting, so there's no clipping risk to guard.
         icon: 'h-10 w-10 sm:h-9 sm:w-9',
       },
     },

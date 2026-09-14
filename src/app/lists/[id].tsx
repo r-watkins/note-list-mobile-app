@@ -22,6 +22,7 @@ import {
 } from '@/features/lists/list.repository';
 import { moveListItem, moveSublist, type MoveDirection } from '@/features/lists/list.service';
 import { runWrite } from '@/lib/errors';
+import { hapticCheckboxToggle } from '@/lib/haptics';
 import { generateId } from '@/lib/id';
 
 export default function ListDetailScreen() {
@@ -44,6 +45,7 @@ export default function ListDetailScreen() {
   }
 
   const handleToggleItem = (itemId: string, isChecked: boolean) => {
+    hapticCheckboxToggle();
     runWrite(() => updateListItem(itemId, { isChecked }, new Date()));
   };
 

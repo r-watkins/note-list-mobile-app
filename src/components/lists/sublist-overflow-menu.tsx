@@ -12,6 +12,7 @@ import {
   updateSublistTitle,
 } from '@/features/lists/list.repository';
 import { runWrite } from '@/lib/errors';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /**
  * A sublist header's overflow menu (spec §5.3, §5.4): check all / uncheck all / rename /
@@ -46,7 +47,10 @@ export function SublistOverflowMenu({
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => runWrite(() => deleteSublist(sublistId, new Date())),
+          onPress: () => {
+            hapticDestructiveConfirm();
+            runWrite(() => deleteSublist(sublistId, new Date()));
+          },
         },
       ],
     );

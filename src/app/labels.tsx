@@ -15,6 +15,7 @@ import {
   removeLabel,
   renameLabel,
 } from '@/features/labels/label.service';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /**
  * Same contract as lib/errors.ts's runWrite, except a DuplicateLabelNameError gets its own
@@ -93,7 +94,10 @@ export default function LabelsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => runLabelWrite(() => removeLabel(label.id)),
+          onPress: () => {
+            hapticDestructiveConfirm();
+            runLabelWrite(() => removeLabel(label.id));
+          },
         },
       ],
     );

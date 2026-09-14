@@ -9,6 +9,7 @@ import { confirmedBulkSetChecked } from '@/features/lists/list.actions';
 import { updateListEntryTitle } from '@/features/lists/list.repository';
 import { deleteList } from '@/features/lists/list.service';
 import { runWrite } from '@/lib/errors';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /**
  * The list detail screen's overflow menu (spec §5.4, §11.2): check all / uncheck all /
@@ -43,6 +44,7 @@ export function ListOverflowMenu({
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
+            hapticDestructiveConfirm();
             const result = runWrite(() => deleteList(entryId));
             if (result.ok) {
               onDeleted();

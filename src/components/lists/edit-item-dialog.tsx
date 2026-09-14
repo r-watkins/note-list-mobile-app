@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { deleteListItem, updateListItem, type ListItemRow } from '@/features/lists/list.repository';
 import { runWrite } from '@/lib/errors';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /** Edit an item's text and checkbox/text type (spec §5.2, §11.2), or delete it. */
 export function EditItemDialog({
@@ -52,7 +53,10 @@ export function EditItemDialog({
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => runWrite(() => deleteListItem(item.id, new Date())),
+        onPress: () => {
+          hapticDestructiveConfirm();
+          runWrite(() => deleteListItem(item.id, new Date()));
+        },
       },
     ]);
   };

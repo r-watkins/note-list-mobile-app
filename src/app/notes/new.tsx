@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { createNote } from '@/features/notes/note.service';
 import { runWrite } from '@/lib/errors';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /**
  * Create a new note: title + rich-text body, explicit Save action (spec §11.3 - no
@@ -48,7 +49,10 @@ export default function NewNoteScreen() {
             {
               text: 'Discard',
               style: 'destructive',
-              onPress: () => navigation.dispatch(e.data.action),
+              onPress: () => {
+                hapticDestructiveConfirm();
+                navigation.dispatch(e.data.action);
+              },
             },
           ],
         );

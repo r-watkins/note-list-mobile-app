@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/text';
 import { useNoteDetail } from '@/features/notes/note.hooks';
 import { updateNote } from '@/features/notes/note.service';
 import { runWrite } from '@/lib/errors';
+import { hapticDestructiveConfirm } from '@/lib/haptics';
 
 /**
  * The edit form itself - split out from the screen so useNoteEditor's initialContent is
@@ -69,7 +70,10 @@ function NoteEditForm({
             {
               text: 'Discard',
               style: 'destructive',
-              onPress: () => navigation.dispatch(e.data.action),
+              onPress: () => {
+                hapticDestructiveConfirm();
+                navigation.dispatch(e.data.action);
+              },
             },
           ],
         );

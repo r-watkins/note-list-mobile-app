@@ -4,8 +4,17 @@ import { cn } from '@/lib/utils';
 import * as DialogPrimitive from '@rn-primitives/dialog';
 import { X } from 'lucide-react-native';
 import * as React from 'react';
-import { Platform, Text, View, type GestureResponderEvent, type ViewProps } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+  type GestureResponderEvent,
+  type ViewProps,
+} from 'react-native';
 import { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FullWindowOverlay as RNFullWindowOverlay } from 'react-native-screens';
 
 const Dialog = DialogPrimitive.Root;
@@ -65,6 +74,14 @@ function DialogOverlay({
     </FullWindowOverlay>
   );
 }
+/** Keeps the dialog card off the screen edges and out of the status bar/home-indicator
+ * safe areas on every device, rather than relying on NativeWind's percentage/calc width
+ * classes, which don't reliably stretch this cross-platform Content primitive to fill its
+ * container (it was rendering shrink-to-fit-content narrow instead - see caller reports). */
+const DIALOG_HORIZONTAL_MARGIN = 16;
+const DIALOG_MAX_WIDTH = 512;
+const DIALOG_VERTICAL_MARGIN = 16;
+
 function DialogContent({
   className,
   portalHost,
@@ -73,12 +90,20 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   portalHost?: string;
 }) {
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const maxHeight = height - insets.top - insets.bottom - DIALOG_VERTICAL_MARGIN * 2;
+
   return (
     <DialogPortal hostName={portalHost}>
       <DialogOverlay>
         <DialogPrimitive.Content
+          style={{
+            width: Math.min(width - DIALOG_HORIZONTAL_MARGIN * 2, DIALOG_MAX_WIDTH),
+            maxHeight,
+          }}
           className={cn(
-            'bg-background border-border z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-lg border p-6 shadow-lg shadow-black/5 sm:max-w-lg',
+            'bg-background border-border z-50 overflow-hidden rounded-lg border shadow-lg shadow-black/5',
             Platform.select({
               web: 'animate-in fade-in-0 zoom-in-95 duration-200',
             }),
@@ -86,7 +111,9 @@ function DialogContent({
           )}
           {...props}
         >
-          <>{children}</>
+          <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
+            <>{children}</>
+          </ScrollView>
           <DialogPrimitive.Close
             className={cn(
               'absolute right-4 top-4 rounded opacity-70 active:opacity-100',

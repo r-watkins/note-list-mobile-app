@@ -54,7 +54,7 @@ export default function NoteDetailScreen() {
       />
       <View className="flex-1 bg-background">
         {labels.length > 0 ? (
-          <View className="flex-row flex-wrap gap-2 px-4 pt-4">
+          <View className="flex-row flex-wrap gap-2 px-4 pb-3 pt-4">
             {labels.map((label) => (
               <View key={label.id} className="bg-elevated rounded-full px-2 py-0.5">
                 <Text className="text-dim text-xs">{label.name}</Text>

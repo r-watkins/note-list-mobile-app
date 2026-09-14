@@ -71,6 +71,9 @@ const NOTE_EDITOR_CSS = `
     background-color: ${THEME.elevated};
     color: ${THEME.foreground};
   }
+  .ProseMirror {
+    padding: 0 16px;
+  }
 `;
 
 export type { EditorBridge };

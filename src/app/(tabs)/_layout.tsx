@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router';
+import { LibraryBig, Settings as SettingsIcon } from 'lucide-react-native';
 
+import { Icon } from '@/components/ui/icon';
 import { THEME } from '@/theme/theme';
 
 export default function TabsLayout() {
@@ -13,8 +15,20 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: THEME.mutedForeground,
       }}
     >
-      <Tabs.Screen name="library" options={{ title: 'Library' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: 'Library',
+          tabBarIcon: ({ color, size }) => <Icon as={LibraryBig} size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => <Icon as={SettingsIcon} size={size} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { db } from '@/db/client';
 import migrations from '@/db/migrations/migrations';
@@ -53,17 +54,19 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: THEME.background }}>
-      <ThemeProvider value={NAV_THEME}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { flex: 1, backgroundColor: THEME.background },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-        <PortalHost />
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider value={NAV_THEME}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { flex: 1, backgroundColor: THEME.background },
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+          <PortalHost />
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

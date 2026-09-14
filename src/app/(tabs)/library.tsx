@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Plus, SlidersHorizontal } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LibraryEmptyState } from '@/components/library/library-empty-state';
 import { LibraryFilterSortDialog } from '@/components/library/library-filter-sort-dialog';
@@ -26,6 +27,7 @@ const SEARCH_DEBOUNCE_MS = 200;
 
 export default function LibraryScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState('');
   const debouncedSearchText = useDebouncedValue(searchText, SEARCH_DEBOUNCE_MS);
   const [contentType, setContentType] = useState<LibraryContentTypeFilter>('all');
@@ -86,8 +88,8 @@ export default function LibraryScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View className="gap-3 px-4 pb-3 pt-4">
-        <Text className="text-2xl font-semibold">Library</Text>
+      <View className="gap-3 px-4 pb-3" style={{ paddingTop: insets.top + 16 }}>
+        <Text className="text-2xl font-semibold">Pantry List</Text>
         <View className="flex-row items-center gap-2">
           <Input
             value={searchText}
@@ -111,6 +113,7 @@ export default function LibraryScreen() {
         <FlashList
           data={entries}
           keyExtractor={(entry) => entry.id}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
           renderItem={({ item }) => (
             <LibraryResultRow
               entry={item}

@@ -1,18 +1,17 @@
+import { FlashList } from '@shopify/flash-list';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { MoreVertical } from 'lucide-react-native';
-import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { EditItemDialog } from '@/components/lists/edit-item-dialog';
-import { ListItemRowView } from '@/components/lists/list-item-row';
+import { ListDetailRowView } from '@/components/lists/list-detail-row';
 import { ListOverflowMenu } from '@/components/lists/list-overflow-menu';
-import { QuickAddRow } from '@/components/lists/quick-add-row';
 import { RenameDialog } from '@/components/lists/rename-dialog';
-import { SublistSection } from '@/components/lists/sublist-section';
+import { SublistOverflowMenu } from '@/components/lists/sublist-overflow-menu';
+import { buildListDetailRows, type ListDetailRow } from '@/features/lists/list-detail-rows';
 import { nextSortOrder, useListDetail } from '@/features/lists/list.hooks';
 import {
   insertListItem,
@@ -32,6 +31,15 @@ export default function ListDetailScreen() {
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [addSublistOpen, setAddSublistOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ListItemRow | null>(null);
+  const [overflowSublistId, setOverflowSublistId] = useState<string | null>(null);
+
+  // Spec §13: "long list views" must use a virtualized list, same as Library's FlashList -
+  // root items, every sublist's header/items/quick-add, and the trailing button are
+  // flattened into one row array so a single FlashList virtualizes the whole screen (a list
+  // with thousands of items previously rendered via ScrollView + .map() failed to render at
+  // all - see design.md's Task 52 amendment).
+  const rows = useMemo(() => buildListDetailRows(rootItems, sublists), [rootItems, sublists]);
+  const overflowSublist = sublists.find((s) => s.id === overflowSublistId);
 
   if (!entry) {
     return (
@@ -49,21 +57,7 @@ export default function ListDetailScreen() {
     runWrite(() => updateListItem(itemId, { isChecked }, new Date()));
   };
 
-  const handleAddRootItem = (content: string) => {
-    runWrite(() =>
-      insertListItem({
-        id: generateId(),
-        listEntryId: entry.id,
-        sublistId: null,
-        itemType: 'checkbox',
-        content,
-        sortOrder: nextSortOrder(rootItems),
-        now: new Date(),
-      }),
-    );
-  };
-
-  const handleAddSublistItem = (sublistId: string, content: string) => {
+  const handleAddItem = (sublistId: string | null, content: string) => {
     const sublist = sublists.find((s) => s.id === sublistId);
     runWrite(() =>
       insertListItem({
@@ -72,7 +66,7 @@ export default function ListDetailScreen() {
         sublistId,
         itemType: 'checkbox',
         content,
-        sortOrder: nextSortOrder(sublist?.items ?? []),
+        sortOrder: nextSortOrder(sublistId === null ? rootItems : (sublist?.items ?? [])),
         now: new Date(),
       }),
     );
@@ -116,49 +110,26 @@ export default function ListDetailScreen() {
           ),
         }}
       />
-      <ScrollView className="flex-1 bg-background" contentContainerClassName="py-4">
-        <Card className="mx-4 mb-4 gap-0 py-0">
-          <CardContent className="gap-0 px-0 pb-2">
-            {rootItems.length > 0 ? (
-              <View className="border-border border-t">
-                {rootItems.map((item, index) => (
-                  <ListItemRowView
-                    key={item.id}
-                    item={item}
-                    onToggle={(checked) => handleToggleItem(item.id, checked)}
-                    onEdit={() => setEditingItem(item)}
-                    onMoveUp={() => handleMoveItem(item.id, 'up')}
-                    onMoveDown={() => handleMoveItem(item.id, 'down')}
-                    isFirst={index === 0}
-                    isLast={index === rootItems.length - 1}
-                  />
-                ))}
-              </View>
-            ) : null}
-            <QuickAddRow placeholder="Add an item" onAdd={handleAddRootItem} />
-          </CardContent>
-        </Card>
-
-        {sublists.map((sublist, index) => (
-          <SublistSection
-            key={sublist.id}
-            sublist={sublist}
-            onToggleItem={handleToggleItem}
-            onAddItem={(content) => handleAddSublistItem(sublist.id, content)}
-            onEditItem={setEditingItem}
-            onMoveItemUp={(itemId) => handleMoveItem(itemId, 'up')}
-            onMoveItemDown={(itemId) => handleMoveItem(itemId, 'down')}
-            onMoveUp={() => handleMoveSublist(sublist.id, 'up')}
-            onMoveDown={() => handleMoveSublist(sublist.id, 'down')}
-            isFirst={index === 0}
-            isLast={index === sublists.length - 1}
-          />
-        ))}
-
-        <Button variant="outline" className="mx-4" onPress={() => setAddSublistOpen(true)}>
-          <Text>Add sublist</Text>
-        </Button>
-      </ScrollView>
+      <View className="flex-1 bg-background">
+        <FlashList<ListDetailRow>
+          data={rows}
+          keyExtractor={(row) => row.key}
+          getItemType={(row) => row.kind}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 16 }}
+          renderItem={({ item: row }) => (
+            <ListDetailRowView
+              row={row}
+              onToggleItem={handleToggleItem}
+              onEditItem={setEditingItem}
+              onMoveItem={handleMoveItem}
+              onAddItem={handleAddItem}
+              onMoveSublist={handleMoveSublist}
+              onOpenSublistOverflow={setOverflowSublistId}
+              onAddSublistPress={() => setAddSublistOpen(true)}
+            />
+          )}
+        />
+      </View>
       <ListOverflowMenu
         open={overflowOpen}
         onOpenChange={setOverflowOpen}
@@ -185,6 +156,18 @@ export default function ListDetailScreen() {
             }
           }}
           item={editingItem}
+        />
+      ) : null}
+      {overflowSublist ? (
+        <SublistOverflowMenu
+          open={overflowSublistId !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setOverflowSublistId(null);
+            }
+          }}
+          sublistId={overflowSublist.id}
+          sublistTitle={overflowSublist.title}
         />
       ) : null}
     </>

@@ -2,12 +2,12 @@
 
 An open-source, local-first mobile app for reusable hierarchical lists and labeled rich-text notes — built with Expo and React Native.
 
-The core use case is a recurring grocery list: create it once, check items off while shopping, then clear the checked state (all at once, or sublist by sublist) and reuse the exact same list next time. No accounts, no cloud, no template gimmicks — just a fast, structured list and note tool that keeps working with no network connection.
+The core use case is a recurring grocery list: create it once, check items off while shopping, then clear the checked state (all at once, or sublist by sublist) and reuse the exact same list next time. No subscriptions, no accounts, no cloud — just a fast, structured list and note tool that keeps working with no network connection.
 
 ## Features
 
 - **Hierarchical lists** — root-level items plus named sublists (e.g. a "Grocery List" with "Dairy", "Produce", "Meats" sections), each holding checkbox or plain-text items.
-- **Reuse, not templates** — check items off, then bulk-uncheck the whole list or a single sublist to reset it for next time. A confirmation guards any bulk action affecting more than 10 items.
+- **Reuse** — check items off, then bulk-uncheck the whole list or a single sublist to reset it for next time. A confirmation guards any bulk action affecting more than 10 items.
 - **Reorder** — move items and sublists up/down within their parent container.
 - **Rich-text notes** — bold, italic, underline, headings (H1–H6), bullet lists, and numbered lists, with multiple labels per note.
 - **Library** — a single searchable, filterable, sortable view across every list and note. Search matches list titles, sublist titles, list-item text, note titles, and note labels, with a contextual match preview (e.g. "Dairy · Milk") for nested hits.

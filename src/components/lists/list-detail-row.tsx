@@ -44,6 +44,7 @@ export function ListDetailRowView({
   onMoveSublist,
   onOpenSublistOverflow,
   onAddSublistPress,
+  onQuickAddFocus,
 }: {
   row: ListDetailRow;
   onToggleItem: (itemId: string, isChecked: boolean) => void;
@@ -53,6 +54,7 @@ export function ListDetailRowView({
   onMoveSublist: (sublistId: string, direction: MoveDirection) => void;
   onOpenSublistOverflow: (sublistId: string) => void;
   onAddSublistPress: () => void;
+  onQuickAddFocus: (rowKey: string) => void;
 }) {
   if (row.kind === 'item') {
     return (
@@ -88,6 +90,7 @@ export function ListDetailRowView({
         <QuickAddRow
           placeholder={row.placeholder}
           onAdd={(content) => onAddItem(row.sublistId, content)}
+          onFocus={() => onQuickAddFocus(row.key)}
         />
       </View>
     );

@@ -10,9 +10,11 @@ import { Input } from '@/components/ui/input';
 export function QuickAddRow({
   placeholder,
   onAdd,
+  onFocus,
 }: {
   placeholder: string;
   onAdd: (content: string) => void;
+  onFocus?: () => void;
 }) {
   const [text, setText] = useState('');
 
@@ -31,6 +33,7 @@ export function QuickAddRow({
         value={text}
         onChangeText={setText}
         placeholder={placeholder}
+        onFocus={onFocus}
         onSubmitEditing={submit}
         returnKeyType="done"
         className="flex-1"

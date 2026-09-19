@@ -31,10 +31,10 @@ function makeSublist(id: string, items: ListItemRow[]): SublistWithItems {
 }
 
 describe('buildListDetailRows', () => {
-  it('always includes a root quick-add row and a trailing add-sublist button, even with no data', () => {
+  it('always includes a root quick-add row and a leading add-sublist button, even with no data', () => {
     const rows = buildListDetailRows([], []);
-    expect(rows.map((r) => r.kind)).toEqual(['quick-add', 'add-sublist-button']);
-    expect(rows[0]).toMatchObject({ sublistId: null, roundedTop: true, borderTop: false });
+    expect(rows.map((r) => r.kind)).toEqual(['add-sublist-button', 'quick-add']);
+    expect(rows[1]).toMatchObject({ sublistId: null, roundedTop: true, borderTop: false });
   });
 
   it('gives the first root item the rounded-top card corner and no others', () => {
@@ -69,12 +69,12 @@ describe('buildListDetailRows', () => {
     const sublist = makeSublist('Aisle A', sublistItems);
     const rows = buildListDetailRows([], [sublist]);
     expect(rows.map((r) => r.kind)).toEqual([
+      'add-sublist-button',
       'quick-add', // root (empty root items still gets a quick-add row)
       'sublist-header',
       'item',
       'item',
       'quick-add',
-      'add-sublist-button',
     ]);
   });
 

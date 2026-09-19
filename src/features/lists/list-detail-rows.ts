@@ -3,7 +3,7 @@ import type { ListItemRow, SublistWithItems } from '@/features/lists/list.reposi
 /**
  * The list detail screen (spec §13: "long list views" must use a virtualized list, same as
  * Library's FlashList) flattens root items, each sublist's header/items/quick-add, and the
- * trailing "Add sublist" button into one ordered array so a single FlashList can virtualize
+ * leading "Add sublist" button into one ordered array so a single FlashList can virtualize
  * across the whole screen - not just within one section. `roundedTop`/`roundedBottom`/
  * `borderTop` let each row recreate its slice of the Card visual (rounded-xl border box)
  * that used to be one physical Card per section; see list-detail-row.tsx for how they're
@@ -41,7 +41,7 @@ export function buildListDetailRows(
   rootItems: ListItemRow[],
   sublists: SublistWithItems[],
 ): ListDetailRow[] {
-  const rows: ListDetailRow[] = [];
+  const rows: ListDetailRow[] = [{ key: 'add-sublist-button', kind: 'add-sublist-button' }];
 
   rootItems.forEach((item, index) => {
     rows.push({
@@ -93,8 +93,6 @@ export function buildListDetailRows(
       borderTop: sublist.items.length === 0,
     });
   });
-
-  rows.push({ key: 'add-sublist-button', kind: 'add-sublist-button' });
 
   return rows;
 }

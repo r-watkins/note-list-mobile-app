@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { useNoteDetail } from '@/features/notes/note.hooks';
 import { updateNote } from '@/features/notes/note.service';
+import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { runWrite } from '@/lib/errors';
 import { hapticDestructiveConfirm } from '@/lib/haptics';
 
@@ -40,6 +41,7 @@ function NoteEditForm({
 }) {
   const router = useRouter();
   const navigation = useNavigation();
+  const keyboardHeight = useKeyboardHeight();
   const [title, setTitle] = useState(initialTitle);
   const [bodyDirty, setBodyDirty] = useState(false);
   const [labelIds, setLabelIds] = useState<string[]>(initialLabelIds);
@@ -97,7 +99,7 @@ function NoteEditForm({
   return (
     <>
       <Stack.Screen options={{ headerShown: true, title: 'Edit note' }} />
-      <View className="flex-1 bg-background">
+      <View className="flex-1 bg-background" style={{ paddingBottom: keyboardHeight }}>
         <View className="gap-3 p-4">
           <Input
             value={title}

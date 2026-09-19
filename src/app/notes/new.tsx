@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { createNote } from '@/features/notes/note.service';
+import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { runWrite } from '@/lib/errors';
 import { hapticDestructiveConfirm } from '@/lib/haptics';
 
@@ -23,6 +24,7 @@ import { hapticDestructiveConfirm } from '@/lib/haptics';
 export default function NewNoteScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const keyboardHeight = useKeyboardHeight();
   const [title, setTitle] = useState('');
   const [bodyDirty, setBodyDirty] = useState(false);
   const [labelIds, setLabelIds] = useState<string[]>([]);
@@ -76,7 +78,7 @@ export default function NewNoteScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: true, title: 'New note' }} />
-      <View className="flex-1 bg-background">
+      <View className="flex-1 bg-background" style={{ paddingBottom: keyboardHeight }}>
         <View className="gap-3 p-4">
           <Input
             value={title}

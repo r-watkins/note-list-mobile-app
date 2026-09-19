@@ -1,7 +1,7 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { MoreVertical } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
@@ -20,6 +20,7 @@ import {
   type ListItemRow,
 } from '@/features/lists/list.repository';
 import { moveListItem, moveSublist, type MoveDirection } from '@/features/lists/list.service';
+import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { runWrite } from '@/lib/errors';
 import { hapticCheckboxToggle } from '@/lib/haptics';
 import { generateId } from '@/lib/id';
@@ -40,6 +41,27 @@ export default function ListDetailScreen() {
   // all - see design.md's Task 52 amendment).
   const rows = useMemo(() => buildListDetailRows(rootItems, sublists), [rootItems, sublists]);
   const overflowSublist = sublists.find((s) => s.id === overflowSublistId);
+
+  // Edge-to-edge means the OS won't resize for the keyboard: shrink the list ourselves, then
+  // scroll the row being typed in back into view once the smaller viewport has laid out.
+  const keyboardHeight = useKeyboardHeight();
+  const listRef = useRef<FlashListRef<ListDetailRow>>(null);
+  const focusedRowKey = useRef<string | null>(null);
+  const scrollToFocusedRow = () => {
+    const index = rows.findIndex((row) => row.key === focusedRowKey.current);
+    if (index >= 0) {
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 1 });
+    }
+  };
+  useEffect(() => {
+    if (keyboardHeight === 0) {
+      focusedRowKey.current = null;
+      return;
+    }
+    const timer = setTimeout(scrollToFocusedRow, 100);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyboardHeight]);
 
   if (!entry) {
     return (
@@ -110,8 +132,9 @@ export default function ListDetailScreen() {
           ),
         }}
       />
-      <View className="flex-1 bg-background">
+      <View className="flex-1 bg-background" style={{ paddingBottom: keyboardHeight }}>
         <FlashList<ListDetailRow>
+          ref={listRef}
           data={rows}
           keyExtractor={(row) => row.key}
           getItemType={(row) => row.kind}
@@ -126,6 +149,13 @@ export default function ListDetailScreen() {
               onMoveSublist={handleMoveSublist}
               onOpenSublistOverflow={setOverflowSublistId}
               onAddSublistPress={() => setAddSublistOpen(true)}
+              onQuickAddFocus={(rowKey) => {
+                focusedRowKey.current = rowKey;
+                // Keyboard already up (moving between inputs): no height change to trigger it.
+                if (keyboardHeight > 0) {
+                  setTimeout(scrollToFocusedRow, 100);
+                }
+              }}
             />
           )}
         />
